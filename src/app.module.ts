@@ -4,9 +4,10 @@ import { AppService } from './app.service';
 import { HelloController } from './hello/hello.controller';
 import { UserModule } from './user/user.module';
 import { ScrollingModule } from './scrolling/scrolling.module';
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UserModule,ScrollingModule],
+  imports: [UserModule,ScrollingModule, AuthModule],
   controllers: [AppController, HelloController],
   providers: [AppService],
 })
