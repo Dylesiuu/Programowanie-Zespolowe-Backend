@@ -21,21 +21,21 @@ describe('AuthController', () => {
 
   it('should successfully register a new user', async () =>
   {
-    const newUserData = {email: 'email@email.com', password: 'password'};
+    const newUserData = {name: 'name', lastName: 'lastName', email: 'email', password: 'password'};
 
-    const res = await controller.register(newUserData.email, newUserData.password);
+    const res = await controller.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
 
     expect(res).toHaveProperty('message', 'User registered successfully');
   });
-
++
   it('should throw error if user already exists', async () =>
   {
-    const newUserData = {email: 'email@email.com', password: 'password'};
+    const newUserData = {name: 'name', lastName: 'lastName', email: 'email', password: 'password'};
 
-    await controller.register(newUserData.email, newUserData.password);
+    await controller.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
 
 
-    await expect(controller.register(newUserData.email, newUserData.password)).rejects.toThrow(new ConflictException('User with this email already exists'));
+    await expect(controller.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password)).rejects.toThrow(new ConflictException('User with this email already exists'));
 
   });
 });

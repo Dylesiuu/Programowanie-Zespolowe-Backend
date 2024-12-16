@@ -19,9 +19,10 @@ describe('AuthService', () => {
 
   it('should register a new user successfully', async () =>
   {
-    const newUserData = {email: 'email@email.com', password: 'password'};
+    const newUserData = {name: 'name', lastName: 'lastName', email: 'email', password: 'password'};
 
-    const res = await service.register(newUserData.email, newUserData.password);
+    const res = await service.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
+
 
     expect(res.message).toEqual('User registered successfully');
     expect(service.users[service.users.length - 1]).toHaveProperty('email', newUserData.email);
@@ -32,9 +33,11 @@ describe('AuthService', () => {
 
   it('should not allow registration of an already existing user', async () =>
   {
-    const newUserData = {email: 'email@email.com', password: 'password'};
-    await service.register(newUserData.email, newUserData.password);
-    const res = await service.register(newUserData.email, newUserData.password);
+    const newUserData = {name: 'name', lastName: 'lastName', email: 'email', password: 'password'};
+    await service.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
+
+    const res = await service.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
+
 
     expect(res.message).toEqual('User with this email already exists');
   });
