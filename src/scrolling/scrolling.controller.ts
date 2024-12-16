@@ -24,6 +24,10 @@ export class ScrollingController {
         }
     }
 
+    @Get('')
+    gatAllPet(){
+        return this.scrollingService.getAll();
+    }
     
 
 }
