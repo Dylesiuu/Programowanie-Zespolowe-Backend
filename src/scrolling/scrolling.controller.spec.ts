@@ -4,11 +4,23 @@ import { ScrollingService } from './scrolling.service';
 
 describe('ScrollingController', () => {
   let controller: ScrollingController;
+  let mockService: Partial<ScrollingService>;
+
+  
 
   beforeEach(async () => {
+    mockService = {
+      getPetbyIndex: jest.fn(), 
+      getPetbyName: jest.fn(),  
+      getAll: jest.fn()
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       controllers: [ScrollingController],
-      providers: [ScrollingService],
+      providers: [{
+        provide: ScrollingService,
+        useValue: mockService, 
+      },],
     }).compile();
 
     controller = module.get<ScrollingController>(ScrollingController);
@@ -23,40 +35,51 @@ describe('ScrollingController', () => {
   // test 2: zwracanie danych
   it("return item from table of index 2",()=>{
       const result = controller.getData("2");
-      expect(result).toEqual({id: 2,name: "Spongebob",wiek: 10, opis: "pochodzi z bydgoszczy",foto:"image/3.png"});
+      expect(mockService.getPetbyIndex).toHaveBeenCalledWith("2"); 
   })
 
   //test 3: zły indeks(wartosc błedna)
   it("return rerror for index out of range",()=>{
     const result = controller.getData("-1");
-      expect(result).toEqual({ error: 'Index jest Invalidą.' });
+    expect(mockService.getPetbyIndex).toHaveBeenCalledWith("-1");
   })
 
   //test 4: zły indeks(wartosc nie wystepuje)
   it("return rerror for index out of range",()=>{
     const result = controller.getData("5");
-      expect(result).toEqual({ error: 'Pet not found.' });
+    expect(mockService.getPetbyIndex).toHaveBeenCalledWith("5");
   })
 
-  //test 4: zły indeks(nie liczba)
+  //test 5: zły indeks(nie liczba)
   it("return error for index not a number",()=>{
+
     const result = controller.getData("aa");
-      expect(result).toEqual({ error: 'Pet with that name not found.' });
+      expect(mockService.getPetbyName).toHaveBeenCalledWith("aa");
   })
 
-  //test 5: branie pet z imienia
+  //test 6: branie pet z imienia
   it("return pet by name",()=>{
     const result = controller.getData("Pomelo");
-      expect(result).toEqual([{id: 1, name: "Pomelo",    wiek: 11, opis: "pochodzi z torunia",       foto:"image/2.png"}]);
+    expect(mockService.getPetbyName).toHaveBeenCalledWith("Pomelo");
   })
 
-  //test 6: wiecej niz jeden pet z takim imieniem
+  //test 7: wiecej niz jeden pet z takim imieniem
   it("return more than one pet by name",()=>{
     const result = controller.getData("Spongebob");
-      expect(result).toEqual([
-        {id: 2, name: "Spongebob", wiek: 10, opis: "pochodzi z bydgoszczy",    foto:"image/3.png"},
-        {id: 3, name: "Spongebob", wiek: 12, opis: "pochodzi z grudziądza",    foto:"image/2.png"}
-      ]);
+    expect(mockService.getPetbyName).toHaveBeenCalledWith("Spongebob");
+  })
+
+  //test 8: zwracanie całej tablicy funkcją getAll
+  it("return table by getAll function",()=>{
+    const mockPetsTable = [
+      {id: 0, name: "Ramen",  age: '1 rok',  discribtion: "pochodzi", gender: 'Pies', location: "Warszawa", shelter: "Schronisko",  traids: ["Spokojny", "Czuły", "Leniwy"] ,       image: '/png'},
+      {id: 1, name: "Pomelo", age: '2 lata', discribtion: "pochodzi",  gender: 'Suka', location: "Toruń",    shelter: "Schronisko", traids: ["Energiczny", "Lojalny", "Ciekawski"], image: '/png'},
+    ];
+
+    jest.spyOn(mockService, 'getAll').mockReturnValue(mockPetsTable);
+
+    const result = controller.gatAllPet();
+    expect(result).toEqual(mockPetsTable);
   })
 
 
