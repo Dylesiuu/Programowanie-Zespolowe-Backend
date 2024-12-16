@@ -7,7 +7,7 @@ import { ScrollingModule } from './scrolling/scrolling.module';
 import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UserModule,ScrollingModule, AuthModule],
+  imports: [UserModule, ScrollingModule, AuthModule],
   controllers: [AppController, HelloController],
   providers: [AppService],
 })

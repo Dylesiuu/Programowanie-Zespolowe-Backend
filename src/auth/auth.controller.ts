@@ -1,38 +1,20 @@
 import { Controller, Post, Body, ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 @Controller('auth')
-export class AuthController
+export class AuthController 
 {
-  constructor(private authService: AuthService){}
+  constructor(private authService: AuthService) {}
 
   @Post('register')
-  async register(@Body('name') name: string, @Body('lastname') lastName: string, @Body('email') email: string, @Body('password') password: string)
+  async register(@Body() createUserDto: CreateUserDto)
   {
-    console.log(lastName);
-    const res = await this.authService.register(name, lastName, email, password);
+    const res = await this.authService.register(createUserDto);
 
     if (res.message === 'User with this email already exists')
     {
       throw new ConflictException('User with this email already exists');
-    }
-
-    return res;
-  }
-
-  @Post('login')
-  async login(@Body('email') email: string, @Body('password') password: string)
-  {
-      const res = await this.authService.login(email, password);
-
-      if (res.message === 'User does not exist')
-      {
-          throw new ConflictException('User does not exist');
-      }
-
-    if (res.message === 'Bad password')
-    {
-        throw new ConflictException('Bad password');
     }
 
     return res;

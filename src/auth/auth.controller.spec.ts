@@ -2,6 +2,7 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthController } from './auth.controller';
 import { ConflictException } from '@nestjs/common';
 import { AuthService } from './auth.service';
+import { CreateUserDto } from './dto/create-user.dto';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -21,21 +22,31 @@ describe('AuthController', () => {
 
   it('should successfully register a new user', async () =>
   {
-    const newUserData = {name: 'name', lastName: 'lastName', email: 'email', password: 'password'};
+    const newUserData: CreateUserDto = {
+      name: 'name',
+      lastname: 'lastName',
+      email: 'email',
+      password: 'haslO2452345923582fnw823',
+    };
 
-    const res = await controller.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
+    const res = await controller.register(newUserData);
 
     expect(res).toHaveProperty('message', 'User registered successfully');
   });
-+
+
   it('should throw error if user already exists', async () =>
   {
-    const newUserData = {name: 'name', lastName: 'lastName', email: 'email', password: 'password'};
+    const newUserData: CreateUserDto = {
+      name: 'name',
+      lastname: 'lastName',
+      email: 'email',
+      password: 'haslO2452345923582fnw823',
+    };
 
-    await controller.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password);
+    await controller.register(newUserData);
 
-
-    await expect(controller.register(newUserData.name, newUserData.lastName, newUserData.email, newUserData.password)).rejects.toThrow(new ConflictException('User with this email already exists'));
-
+    await expect(controller.register(newUserData)).rejects.toThrow(
+      new ConflictException('User with this email already exists'),
+    );
   });
 });
