@@ -1,15 +1,18 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
+import { Model } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class AuthService {
-  public users = [];
+  constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async register(createUserDto: CreateUserDto) {
     const { email, password, name, lastname } = createUserDto;
 
-    const userExist = this.users.find((user) => user.email === email);
+    const userExist = await this.userModel.findOne({ email });
 
     if (userExist) {
       return { message: 'User with this email already exists' };
@@ -17,19 +20,20 @@ export class AuthService {
 
     const hashedpassword = await bcrypt.hash(password, 12);
 
-    this.users.push({
-      id: Date.now().toString(),
-      name: name,
-      lastname: lastname,
-      email: email,
+    const user = await this.userModel.create({
+      name,
+      lastname,
+      email,
       password: hashedpassword,
     });
+
+    await user.save();
 
     return { message: 'User registered successfully' };
   }
 
   async login(email: string, password: string) {
-    const userExist = this.users.find((user) => user.email === email);
+    const userExist = await this.userModel.findOne({ email });
 
     if (!userExist) {
       return { message: 'User does not exist' };
