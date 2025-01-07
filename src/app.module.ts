@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import mongoose from 'mongoose';
 
 @Module({
   imports: [
@@ -20,6 +21,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get('MONGODB_URI'),
+        serverSelectionTimeoutMS: 3000,
       }),
       inject: [ConfigService],
     }),
@@ -27,4 +29,8 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
   controllers: [AppController, HelloController],
   providers: [AppService],
 })
-export class AppModule {}
+export class AppModule {
+  constructor() {
+    mongoose.set('debug', true);
+  }
+}
