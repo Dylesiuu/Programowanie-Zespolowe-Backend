@@ -45,13 +45,17 @@ describe('AuthController', () => {
     const errors = await validate(newUserDataDto);
     expect(errors.length).toBe(0);
 
-    jest
-      .spyOn(authService, 'register')
-      .mockResolvedValue({ message: 'User registered successfully' });
+    jest.spyOn(authService, 'register').mockResolvedValue({
+      message: 'User registered successfully',
+      token: 'mocked-jwt-token',
+    });
 
     const res = await controller.register(newUserDataDto);
 
-    expect(res).toHaveProperty('message', 'User registered successfully');
+    expect(res).toEqual({
+      message: 'User registered successfully',
+      token: 'mocked-jwt-token',
+    });
     expect(authService.register).toHaveBeenCalledWith(newUserDataDto);
   });
 
@@ -70,6 +74,7 @@ describe('AuthController', () => {
 
     jest.spyOn(authService, 'register').mockResolvedValueOnce({
       message: 'User with this email already exists',
+      token: null,
     });
 
     await expect(controller.register(newUserDataDto)).rejects.toThrow(
@@ -90,13 +95,17 @@ describe('AuthController', () => {
     const errors = await validate(newUserDataDto);
     expect(errors.length).toBe(0);
 
-    jest
-      .spyOn(authService, 'login')
-      .mockResolvedValue({ message: 'User logged successfully' });
+    jest.spyOn(authService, 'login').mockResolvedValue({
+      message: 'User logged successfully',
+      token: 'mocked-jwt-token',
+    });
 
     const res = await controller.login(newUserData.email, newUserData.password);
 
-    expect(res).toHaveProperty('message', 'User logged successfully');
+    expect(res).toEqual({
+      message: 'User logged successfully',
+      token: 'mocked-jwt-token',
+    });
     expect(authService.login).toHaveBeenCalledWith(
       newUserData.email,
       newUserData.password,
@@ -113,7 +122,7 @@ describe('AuthController', () => {
 
     jest
       .spyOn(authService, 'login')
-      .mockResolvedValue({ message: 'User does not exist' });
+      .mockResolvedValue({ message: 'User does not exist', token: null });
 
     await expect(
       controller.login(newUserData.email, newUserData.password),
@@ -135,7 +144,7 @@ describe('AuthController', () => {
 
     jest
       .spyOn(authService, 'login')
-      .mockResolvedValue({ message: 'Bad password' });
+      .mockResolvedValue({ message: 'Bad password', token: null });
 
     await expect(
       controller.login(newUserData.email, 'PaslO2452345923582fnw823$'),
