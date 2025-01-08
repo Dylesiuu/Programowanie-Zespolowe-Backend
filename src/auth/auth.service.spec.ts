@@ -6,15 +6,20 @@ import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { getModelToken } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
-import { mock, MockProxy } from 'jest-mock-extended';
 import { Model } from 'mongoose';
+import { JwtService } from '@nestjs/jwt';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let userModel: MockProxy<Model<UserDocument>>;
+  let userModel: jest.Mocked<Model<UserDocument>>;
+  let jwtService: JwtService;
 
   beforeEach(async () => {
-    userModel = mock<Model<UserDocument>>();
+    userModel = {
+      findOne: jest.fn(),
+      create: jest.fn(),
+      save: jest.fn(),
+    } as any;
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -22,10 +27,17 @@ describe('AuthService', () => {
           provide: getModelToken(User.name),
           useValue: userModel,
         },
+        {
+          provide: JwtService,
+          useValue: {
+            sign: jest.fn(),
+          },
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
+    jwtService = module.get<JwtService>(JwtService);
   });
 
   it('should be defined', () => {
@@ -51,8 +63,13 @@ describe('AuthService', () => {
       save: jest.fn().mockResolvedValue(newUserData),
     } as any);
 
+    (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+
     const res = await service.register(newUserDataDto);
 
+    expect(userModel.findOne).toHaveBeenCalledWith({
+      email: newUserData.email,
+    });
     expect(userModel.create).toHaveBeenCalledWith({
       name: newUserData.name,
       lastname: newUserData.lastname,
@@ -60,13 +77,14 @@ describe('AuthService', () => {
       password: expect.any(String),
     });
 
-    expect(res.message).toEqual('User registered successfully');
-
-    // const passMatch = await bcrypt.compare(
-    //   newUserData.password,
-    //   (await userModel.create()).password,
-    // );
-    // expect(passMatch).toBe(true);
+    expect(jwtService.sign).toHaveBeenCalledWith({
+      email: newUserData.email,
+      sub: undefined,
+    });
+    expect(res).toEqual({
+      message: 'User registered successfully',
+      token: 'mocked-jwt-token',
+    });
   });
 
   it('should not allow registration of an already existing user', async () => {
@@ -88,13 +106,18 @@ describe('AuthService', () => {
       save: jest.fn().mockResolvedValue(newUserData),
     } as any);
 
+    (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+
     await service.register(newUserDataDto);
 
     userModel.findOne.mockResolvedValueOnce(newUserData);
 
     const res = await service.register(newUserDataDto);
 
-    expect(res.message).toEqual('User with this email already exists');
+    expect(res).toEqual({
+      message: 'User with this email already exists',
+      token: null,
+    });
   });
 
   it('should login a existing user successfully', async () => {
