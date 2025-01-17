@@ -4,6 +4,6 @@ import { ScrollingController } from './scrolling.controller';
 
 @Module({
   controllers: [ScrollingController],
-  providers: [ScrollingService]
+  providers: [ScrollingService],
 })
 export class ScrollingModule {}
