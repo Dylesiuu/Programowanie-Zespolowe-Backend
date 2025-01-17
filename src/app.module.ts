@@ -7,6 +7,7 @@ import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AnimalsModule } from './animals/animals.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -25,6 +26,7 @@ import mongoose from 'mongoose';
       }),
       inject: [ConfigService],
     }),
+    AnimalsModule,
   ],
   controllers: [AppController, HelloController],
   providers: [AppService],
