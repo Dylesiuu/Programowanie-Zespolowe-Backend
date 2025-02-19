@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { AnimalsController } from './animals.controller';
 import { AnimalsService } from './animals.service';
+import { mock } from 'jest-mock-extended';
 
 describe('AnimalsController', () => {
   let controller: AnimalsController;
