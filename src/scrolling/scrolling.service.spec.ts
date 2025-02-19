@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScrollingService } from './scrolling.service';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Query } from 'mongoose';
 import { Pet} from './schema/pet.schema';
 import { find, generate } from 'rxjs';
 
@@ -14,7 +14,7 @@ import { find, generate } from 'rxjs';
 const mockPet = [
   {
     id: 0,
-    name: "Ramen",
+    name: "Spongebob",
     age: '1 rok',
     discribtion: "pochodzi z warszawy",
     gender: 'Pies',
@@ -48,9 +48,13 @@ const mockPet = [
 ];
 
 const mockPetModel = {
-  find: jest.fn().mockResolvedValue(mockPet[0]),
-  findOne: jest.fn().mockResolvedValue([mockPet]),
-}
+  findOne: jest.fn().mockImplementation(() => ({
+    exec: jest.fn().mockResolvedValue(null), 
+  })),
+  find: jest.fn().mockImplementation(() => ({
+    exec: jest.fn().mockResolvedValue([]), 
+  })),
+};
 
 describe('ScrollingService', () => {
   let service: ScrollingService;
@@ -63,11 +67,9 @@ describe('ScrollingService', () => {
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
-      providers: [ScrollingService,
-        {
-          provide: getModelToken('Pet'),
-          useValue: mockPetModel,
-        },
+      providers: [
+        ScrollingService,
+        { provide: getModelToken('Pet'), useValue: mockPetModel },
       ],
     }).compile();
 
@@ -80,22 +82,34 @@ describe('ScrollingService', () => {
   });
 
   // test 2: zwracanie danych
-  it('return item from table of index 2', () => {
-    const result = service.getPetbyIndex('2');
-    expect(result).toEqual(mockPetsTable[1]);
+   it('should return a pet by id', async () => {
+    const mockQuery = {
+      exec: jest.fn().mockResolvedValue(mockPet[1]), 
+    };
+  
+    jest.spyOn(model, 'findOne').mockReturnValue(mockQuery as any);
+
+     const result = await service.getPetbyIndex('1');
+     expect(result).toEqual(mockPet[1]);
+     expect(model.findOne).toHaveBeenCalledWith({ id: 1 });
   });
 
   //test 3: zły indeks(wartosc poza zakresem)
-  it('return rerror for index out of range', () => {
-    const result = service.getPetbyIndex('-1');
-    expect(result).toEqual({ error: 'Index is Invalid.' });
-  });
+  it("return error for id out of range", async ()=>{
+    const result = await service.getPetbyIndex("-1");
+      expect(result).toEqual({ error: 'Index is Invalid.' });
+  })
 
   //test 4: zły indeks(wartosc poza zakresem)
-  it('return rerror for index not in table', () => {
-    const result = service.getPetbyIndex('5');
+  it("return rerror for index not in table", async ()=>{
+    const mockQuery = {
+      exec: jest.fn().mockResolvedValue(null), 
+    };
+    jest.spyOn(model, 'findOne').mockReturnValue(mockQuery as any); 
+  
+    const result = await service.getPetbyIndex("5"); 
     expect(result).toEqual({ error: 'Pet not found.' });
-  });
+  })
 
   //test 5: zły indeks(nie liczba)
   it('return error for index not a number', () => {
@@ -104,26 +118,40 @@ describe('ScrollingService', () => {
   });
 
   // test 6: zwracanie danych z nazwy
-  it('return item from table of name', () => {
-    const result = service.getPetbyName('Pomelo');
-    expect(result).toEqual([mockPetsTable[0]]);
-  });
+   it("return item from table of name", async ()=>{
+    jest.spyOn(model, 'find').mockResolvedValue([mockPet[1]]);
+
+     const result = await service.getPetbyName("Pomelo");
+    expect(result).toEqual([mockPet[1]]);
+  })
 
   //test 7: zła nazwa
-  it('return rerror cause name not found', () => {
-    const result = service.getPetbyIndex('5');
-    expect(result).toEqual({ error: 'Pet not found.' });
-  });
+   it("return error cause name not found", async ()=>{
+    jest.spyOn(model, 'find').mockResolvedValue([]);
+     const result = await service.getPetbyName("5321");
+       expect(result).toEqual({error: 'Pet with that name not found.'});
+  })
 
   //test 8: wiecej niz jeden pet z takim imieniem
-  it('return more than one pet by name', () => {
-    const result = service.getPetbyName('Spongebob');
-    expect(result).toEqual([mockPetsTable[1], mockPetsTable[2]]);
-  });
+   it("return more than one pet by name", async ()=>{
+     jest.spyOn(model, 'find').mockResolvedValue([mockPet[0],mockPet[2]]);
+     const result = await service.getPetbyName("Spongebob");
+       expect(result).toEqual([mockPet[0],mockPet[2]]);
+  })
 
-  //test 9: zwracanie całej tablicy funkcją getAll
-  it('return table by getAll function', () => {
-    const result = service.getAll();
-    expect(result).toEqual(mockPetsTable);
-  });
+   //test 9: zwracanie całej tablicy funkcją getAll
+    it("return table by getAll function", async()=>{
+
+      const mockQuery = {
+        exec: jest.fn().mockResolvedValue(mockPet), 
+      };
+      jest.spyOn(model, 'find').mockReturnValue(mockQuery as any); 
+      
+     const result = await service.getAll();
+       expect(result).toEqual(mockPet);
+   })
+
+
+
+
 });
