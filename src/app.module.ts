@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { HelloController } from './hello/hello.controller';
-import { ScrollingModule } from './scrolling/scrolling.module';
 import { UserModule } from './user/user.module';
+import { ScrollingModule } from './scrolling/scrolling.module';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -28,7 +27,7 @@ import mongoose from 'mongoose';
     }),
     AnimalsModule,
   ],
-  controllers: [AppController, HelloController],
+  controllers: [AppController],
   providers: [AppService],
 })
 export class AppModule {
