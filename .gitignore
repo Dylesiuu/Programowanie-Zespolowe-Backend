@@ -50,3 +50,6 @@ pnpm-lock.yaml
 # Files related to ccache or compiler cache
 .cache/
 .cache-loader/
+
+# Test coverage reports
+coverage/
