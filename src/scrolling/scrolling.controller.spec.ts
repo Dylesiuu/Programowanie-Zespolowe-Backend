@@ -1,6 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScrollingController } from './scrolling.controller';
 import { ScrollingService } from './scrolling.service';
+import { Pet } from './schema/pet.schema';
 
 describe('ScrollingController', () => {
   let controller: ScrollingController;
@@ -68,9 +69,10 @@ describe('ScrollingController', () => {
   });
 
   //test 8: zwracanie całej tablicy funkcją getAll
-  it('return table by getAll function', () => {
-    const mockPetsTable = [
+  it('return table by getAll function', async () => {
+    const mockPetsTable: Pet[] = [
       {
+        _id: '1',
         id: 0,
         name: 'Ramen',
         age: '1 rok',
@@ -78,10 +80,11 @@ describe('ScrollingController', () => {
         gender: 'Pies',
         location: 'Warszawa',
         shelter: 'Schronisko',
-        traids: ['Spokojny', 'Czuły', 'Leniwy'],
+        traits: ['Spokojny', 'Czuły', 'Leniwy'],
         image: '/png',
-      },
+      }as Pet,
       {
+        _id: '2',
         id: 1,
         name: 'Pomelo',
         age: '2 lata',
@@ -89,14 +92,16 @@ describe('ScrollingController', () => {
         gender: 'Suka',
         location: 'Toruń',
         shelter: 'Schronisko',
-        traids: ['Energiczny', 'Lojalny', 'Ciekawski'],
+        traits: ['Energiczny', 'Lojalny', 'Ciekawski'],
         image: '/png',
-      },
+      } as Pet,
     ];
 
-    jest.spyOn(mockService, 'getAll').mockReturnValue(mockPetsTable);
+    jest.spyOn(mockService, 'getAll').mockResolvedValue(mockPetsTable);
+    
 
-    const result = controller.gatAllPet();
+    const result = await controller.gatAllPet();
     expect(result).toEqual(mockPetsTable);
+    expect(mockService.getAll).toHaveBeenCalledTimes(1);
   });
 });
