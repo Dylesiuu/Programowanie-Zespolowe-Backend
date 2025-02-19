@@ -8,18 +8,14 @@ import { getModelToken } from '@nestjs/mongoose';
 import { User, UserDocument } from './schemas/user.schema';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
+import { mock } from 'jest-mock-extended';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let userModel: jest.Mocked<Model<UserDocument>>;
-  let jwtService: JwtService;
+  const userModel = mock<Model<UserDocument>>();
+  const jwtService = mock<JwtService>();
 
   beforeEach(async () => {
-    userModel = {
-      findOne: jest.fn(),
-      create: jest.fn(),
-      save: jest.fn(),
-    } as any;
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
@@ -29,15 +25,16 @@ describe('AuthService', () => {
         },
         {
           provide: JwtService,
-          useValue: {
-            sign: jest.fn(),
-          },
+          useValue: jwtService,
         },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    jwtService = module.get<JwtService>(JwtService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
