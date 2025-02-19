@@ -5,10 +5,10 @@ import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
-
+import { mock } from 'jest-mock-extended';
 describe('AuthController', () => {
   let controller: AuthController;
-  let authService: AuthService;
+  const authService = mock<AuthService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -16,16 +16,16 @@ describe('AuthController', () => {
       providers: [
         {
           provide: AuthService,
-          useValue: {
-            register: jest.fn(),
-            login: jest.fn(),
-          },
+          useValue: authService,
         },
       ],
     }).compile();
 
     controller = module.get<AuthController>(AuthController);
-    authService = module.get<AuthService>(AuthService);
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
