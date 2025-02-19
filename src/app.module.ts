@@ -32,6 +32,8 @@ import mongoose from 'mongoose';
 })
 export class AppModule {
   constructor() {
-    mongoose.set('debug', true);
+    if (process.env.NODE_ENV === 'development') {
+      mongoose.set('debug', true);
+    }
   }
 }
