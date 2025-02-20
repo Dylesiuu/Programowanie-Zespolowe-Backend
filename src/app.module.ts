@@ -6,6 +6,7 @@ import { ScrollingModule } from './scrolling/scrolling.module';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AnimalsModule } from './animals/animals.module';
 import mongoose from 'mongoose';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import { APP_GUARD } from '@nestjs/core';
@@ -28,6 +29,7 @@ import { APP_GUARD } from '@nestjs/core';
     UserModule,
     ScrollingModule,
     AuthModule,
+    AnimalsModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
