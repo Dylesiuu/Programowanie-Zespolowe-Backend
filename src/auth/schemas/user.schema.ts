@@ -5,7 +5,6 @@ export type UserDocument = User & Document;
 
 @Schema()
 export class User {
-
   @Prop({ required: true })
   name: string;
 
@@ -22,4 +21,3 @@ export class User {
   favourites: number[];
 }
 export const UserSchema = SchemaFactory.createForClass(User);
-
