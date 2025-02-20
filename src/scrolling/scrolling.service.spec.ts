@@ -58,12 +58,9 @@ const mockPetModel = {
 
 describe('ScrollingService', () => {
   let service: ScrollingService;
+  let model: Model<Pet>;
 
-  const mockPetsTable = [
-    { id: 1, name: 'Pomelo', age: '2 lata' },
-    { id: 2, name: 'Spongebob', age: '4 lata' },
-    { id: 3, name: 'Spongebob', age: '2 lata' },
-  ];
+  
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -112,10 +109,10 @@ describe('ScrollingService', () => {
   })
 
   //test 5: zły indeks(nie liczba)
-  it('return error for index not a number', () => {
-    const result = service.getPetbyIndex('aa');
-    expect(result).toEqual({ error: 'Index is Invalid.' });
-  });
+  it("return error for index not a number",async ()=>{
+    const result = await service.getPetbyIndex("aa");
+      expect(result).toEqual({ error: 'Index is Invalid.' });
+  })
 
   // test 6: zwracanie danych z nazwy
    it("return item from table of name", async ()=>{
