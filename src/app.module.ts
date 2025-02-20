@@ -6,6 +6,7 @@ import { ScrollingModule } from './scrolling/scrolling.module';
 import { AuthModule } from './auth/auth.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { AnimalsModule } from './animals/animals.module';
 import mongoose from 'mongoose';
 
 @Module({
@@ -16,6 +17,7 @@ import mongoose from 'mongoose';
     UserModule,
     ScrollingModule,
     AuthModule,
+    AnimalsModule,
     MongooseModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
