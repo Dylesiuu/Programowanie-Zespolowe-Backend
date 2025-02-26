@@ -1,12 +1,17 @@
 import {
   Controller,
   Post,
+  Get,
   Body,
   ConflictException,
   UnauthorizedException,
+  UseGuards,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
+import { AuthGuard } from '@nestjs/passport';
 
 @Controller('auth')
 export class AuthController {
@@ -39,5 +44,17 @@ export class AuthController {
     }
 
     return res;
+  }
+
+  @Get('google')
+  @UseGuards(AuthGuard('google'))
+  async googleAuth() {}
+
+  @Get('google/callback')
+  @UseGuards(AuthGuard('google'))
+  async googleAuthRedirect(@Req() req) {
+    const user = req.user;
+    const token = user.token;
+    return { message: 'User logged successfully', token };
   }
 }
