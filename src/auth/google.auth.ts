@@ -52,7 +52,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
 
         await newUser.save();
 
-        const payload = { email: user.email, sub: user._id };
+        const payload = { email: newUser.email, sub: newUser._id };
         const token = this.jwtService.sign(payload);
         done(null, { token });
       }
