@@ -1,7 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../auth/schemas/user.schema';
+import { UpdatePasswordDto } from './dto/update-password.dto';
+import { CreateUserDto } from '../auth/dto/create-user.dto';
+import { plainToInstance } from 'class-transformer';
+import { validate } from 'class-validator';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -23,8 +28,16 @@ export class UserService {
     return this.userModel.findOneAndUpdate({ email }, { lastname: newLastname }, { new: true }).exec();
   }
 
-  async updateUserPassword(email: string, newPassword: string): Promise<User | null> {
-    return this.userModel.findOneAndUpdate({ email }, { password: newPassword }, { new: true }).exec();
+  async updateUserPassword(email: string, updatePasswordDto: UpdatePasswordDto): Promise<User | null> {
+    const { password } = updatePasswordDto;
+
+    const hashedPassword = await bcrypt.hash(password, 12);
+
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { password: hashedPassword }, 
+      { new: true }
+    ).exec();
   }
 
   async isFavouriteExists(email: string, favouriteId: number): Promise<boolean> {
@@ -42,5 +55,7 @@ export class UserService {
     if (!(await this.isFavouriteExists(email, favouriteId))) return null;
     return this.userModel.findOneAndUpdate({ email }, { $pull: { favourites: favouriteId } }, { new: true }).exec();
   }
+
+
 
 }

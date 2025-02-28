@@ -1,4 +1,5 @@
-import { Controller, Get, NotFoundException, Param, Patch, Body  } from '@nestjs/common';
+import { Controller, Get, NotFoundException, Param, Patch, Body , UsePipes, ValidationPipe } from '@nestjs/common';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserService } from './user.service';
 import { User } from '../auth/schemas/user.schema';
 
@@ -30,11 +31,20 @@ export class UserController {
     return this.userService.updateUserLastname(email, lastname);
   }
 
-  @Patch('update-password/:email')
-  async updateUserPassword(@Param('email') email: string, @Body('password') password: string): Promise<User> {
-    return this.userService.updateUserPassword(email, password);
-  }
 
+  @Patch('update-password/:email')
+  @UsePipes(new ValidationPipe())
+  async updatePassword(
+    @Param('email') email: string,
+    @Body() updatePasswordDto: UpdatePasswordDto
+  ) {
+    const updatedUser = await this.userService.updateUserPassword(email, updatePasswordDto);
+    if (updatedUser) {
+      return { message: 'Password updated successfully.' };
+    } else {
+      return { message: 'User not found.' };
+    }
+  }
 
   @Patch('add-favourite/:email/:favouriteId')
   async addFavourite(@Param('email') email: string, @Param('favouriteId') favouriteId: number): Promise<User> {

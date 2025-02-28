@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { User } from '../auth/schemas/user.schema';
 import { Model } from 'mongoose';
+import { UpdatePasswordDto } from './dto/update-password.dto';
 
 const mockUser = {
   email: 'Geralt@rivia.com',
@@ -84,8 +85,14 @@ describe('UserService', () => {
   });
 
   it('should update user password', async () => {
-    const updatedUser = await service.updateUserPassword('Geralt@rivia.com', 'Yennefer123');
-    expect(updatedUser.password).toBe('Yennefer123');
+    const updatePasswordDto: UpdatePasswordDto = {
+      password: 'Yennefer123!',
+    };
+  
+    const updatedUser = await service.updateUserPassword('Geralt@rivia.com', updatePasswordDto);
+  
+    expect(updatedUser.password).not.toBe('Zaraza123');
+    expect(updatedUser.password).toBeDefined();
   });
 
   it('should return true if favourite exists', async () => {
