@@ -1,13 +1,27 @@
-import { IsString, IsNotEmpty, IsArray, IsUrl } from 'class-validator';
+import {
+  IsString,
+  IsNotEmpty,
+  IsArray,
+  IsUrl,
+  IsInt,
+  Min,
+  Max,
+} from 'class-validator';
 
 export class CreateAnimalDto {
   @IsString()
   @IsNotEmpty()
   name: string;
 
-  @IsString()
-  @IsNotEmpty()
-  age: string;
+  @IsInt()
+  @Min(1990)
+  @Max(2025)
+  birthYear: number;
+
+  @IsInt()
+  @Min(1)
+  @Max(12)
+  birthMonth: number;
 
   @IsString()
   @IsNotEmpty()
