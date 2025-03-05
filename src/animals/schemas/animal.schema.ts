@@ -9,7 +9,10 @@ export class Animal {
   name: string;
 
   @Prop({ required: true })
-  age: string;
+  birthYear: number;
+
+  @Prop({ required: true })
+  birthMonth: number;
 
   @Prop({ required: true })
   description: string;
