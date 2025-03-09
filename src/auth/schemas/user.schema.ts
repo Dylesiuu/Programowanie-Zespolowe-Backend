@@ -40,8 +40,14 @@ export class User {
   @Prop({ default: [] })
   favourites: number[];
 
-  @Prop({ type: [TraitSchema], default: [], _id: false })
-  traits: Trait[];
+  @Prop()
+  traits: [
+    {
+      tagId: number;
+      priority: number;
+      name: string;
+    },
+  ];
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);
