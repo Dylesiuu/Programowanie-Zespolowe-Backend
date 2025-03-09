@@ -19,5 +19,14 @@ export class User {
 
   @Prop()
   favourites: number[];
+
+  @Prop()
+  traits: [
+    {
+      tagId: number;
+      priority: number;
+      name: string;
+    },
+  ];
 }
 export const UserSchema = SchemaFactory.createForClass(User);

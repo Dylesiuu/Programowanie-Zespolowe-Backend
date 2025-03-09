@@ -1,5 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
+import { ObjectId } from 'mongoose';
 
 @Controller('scrolling')
 export class ScrollingController {
@@ -24,5 +25,10 @@ export class ScrollingController {
   @Get('')
   gatAllPet() {
     return this.scrollingService.getAll();
+  }
+
+  @Get(':userId')
+  match(@Param('userId') userId: ObjectId) {
+    return this.scrollingService.match(userId);
   }
 }
