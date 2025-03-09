@@ -1,8 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScrollingService } from './scrolling.service';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model, Query } from 'mongoose';
+import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { Pet } from './schema/pet.schema';
+import { mock } from 'jest-mock-extended';
+import { User, UserDocument } from '../auth/schemas/user.schema';
 
 // const mockPetsTable = [
 //   { id: 1, name: "Pomelo",    age: '2 lata'},
@@ -20,9 +23,9 @@ const mockPet = [
     location: 'Warszawa',
     shelter: 'Schronisko na Paluchu',
     traits: [
-      { tagId: 1, priority: 3, name: 'Spokojny' },
-      { tagId: 2, priority: 2, name: 'Czuły' },
-      { tagId: 3, priority: 1, name: 'Leniwy' },
+      { tagId: 1, name: 'Spokojny' },
+      { tagId: 2, name: 'Czuły' },
+      { tagId: 3, name: 'Leniwy' },
     ],
     image:
       'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
@@ -36,9 +39,9 @@ const mockPet = [
     location: 'Toruń',
     shelter: 'Schronisko dla zwierząt w Toruniu',
     traits: [
-      { tagId: 4, priority: 3, name: 'Energiczny' },
-      { tagId: 5, priority: 2, name: 'Lojalny' },
-      { tagId: 6, priority: 1, name: 'Ciekawski' },
+      { tagId: 4, name: 'Energiczny' },
+      { tagId: 5, name: 'Lojalny' },
+      { tagId: 6, name: 'Ciekawski' },
     ],
     image:
       'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
@@ -52,9 +55,9 @@ const mockPet = [
     location: 'Bydgoszcz',
     shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
     traits: [
-      { tagId: 7, priority: 3, name: 'Przyjacielski' },
-      { tagId: 8, priority: 2, name: 'Energiczny' },
-      { tagId: 9, priority: 1, name: 'Figlarny' },
+      { tagId: 7, name: 'Przyjacielski' },
+      { tagId: 8, name: 'Energiczny' },
+      { tagId: 9, name: 'Figlarny' },
     ],
     image:
       'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
@@ -63,6 +66,7 @@ const mockPet = [
 
 const mockUsers = [
   {
+    _id: new ObjectId('65f4c8e9f0a5a4d3b4a12345'),
     name: 'Jan',
     lastname: 'Kowalski',
     email: 'jan.kowalski@example.com',
@@ -71,6 +75,7 @@ const mockUsers = [
     traits: [{ tagId: 11, priority: 5, name: 'dom z ogródkiem' }],
   },
   {
+    _id: new ObjectId('65f4c8e9f0a5a4d3b4a67890'),
     name: 'Anna',
     lastname: 'Nowak',
     email: 'anna.nowak@example.com',
@@ -79,14 +84,15 @@ const mockUsers = [
     traits: [{ tagId: 4, priority: 3, name: 'Szuka energicznego' }],
   },
   {
+    _id: new ObjectId('65f4c8e9f0a5a4d3b4a54321'),
     name: 'Piotr',
     lastname: 'Wiśniewski',
     email: 'piotr.wisniewski@example.com',
     password: 'mypassword789',
     favourites: [0, 1, 2],
     traits: [
-      { tagId: 2, priority: 3, name: 'Szuka czułego' },
-      { tagId: 7, priority: 2, name: 'Szuka przyjacielskiego' },
+      { tagId: 2, priority: 2, name: 'Szuka czułego' },
+      { tagId: 7, priority: 3, name: 'Szuka przyjacielskiego' },
     ],
   },
 ];
@@ -103,17 +109,26 @@ const mockPetModel = {
 describe('ScrollingService', () => {
   let service: ScrollingService;
   let model: Model<Pet>;
+  const userModel = mock<Model<UserDocument>>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         ScrollingService,
+        {
+          provide: getModelToken(User.name),
+          useValue: userModel,
+        },
         { provide: getModelToken('Pet'), useValue: mockPetModel },
       ],
     }).compile();
 
     service = module.get<ScrollingService>(ScrollingService);
     model = module.get<Model<Pet>>(getModelToken(Pet.name));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -180,13 +195,33 @@ describe('ScrollingService', () => {
 
   //test 9: zwracanie całej tablicy funkcją getAll
   it('return table by getAll function', async () => {
-    const mockQuery = {
-      exec: jest.fn().mockResolvedValue(mockPet),
-    };
-    jest.spyOn(model, 'find').mockReturnValue(mockQuery as any);
+    jest.spyOn(model, 'find').mockResolvedValue(mockPet);
 
     const result = await service.getAll();
     expect(result).toEqual(mockPet);
   });
 
+  it('should return matched animals if user is found', async () => {
+    jest.spyOn(model, 'find').mockResolvedValue(mockPet);
+    userModel.findById.mockResolvedValue(mockUsers[2]);
+
+    const res = await service.match(mockUsers[2]._id);
+    expect(res).toEqual([mockPet[2], mockPet[0], mockPet[1]]);
+  });
+
+  it('shuld return message if no pets found', async () => {
+    jest.spyOn(model, 'find').mockResolvedValue([]);
+    userModel.findById.mockResolvedValue(mockUsers[2]);
+
+    const res = await service.match(mockUsers[2]._id);
+    expect(res).toEqual({ message: 'No pets found.' });
+  });
+
+  it('should return message if user not found', async () => {
+    jest.spyOn(model, 'find').mockResolvedValue(mockPet);
+    userModel.findById.mockResolvedValue(null);
+
+    const res = await service.match(mockUsers[2]._id);
+    expect(res).toEqual({ message: 'User not found.' });
+  });
 });

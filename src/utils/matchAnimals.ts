@@ -5,6 +5,7 @@ function calculateScore(user, animal) {
     const priority = tag.priority;
 
     const animalTag = animal.traits.find((tag) => tag.tagId === index);
+
     if (animalTag) {
       score += priority;
     }
@@ -19,5 +20,9 @@ export function matchAnimals(user, animals) {
     score: calculateScore(user, animal),
   }));
 
-  return newAnimalsArray.sort((a, b) => b.score - a.score);
+  const sortedAnimalsArray = newAnimalsArray.sort((a, b) => b.score - a.score);
+
+  const result = sortedAnimalsArray.map(({ score, ...animal }) => animal);
+
+  return result;
 }

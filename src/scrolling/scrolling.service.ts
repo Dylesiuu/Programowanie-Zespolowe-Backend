@@ -1,13 +1,17 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { error, table } from 'console';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { Pet } from './schema/pet.schema';
-import { matchAnimals } from 'src/utils/matchAnimals';
+import { matchAnimals } from '../utils/matchAnimals';
+import { User, UserDocument } from '../auth/schemas/user.schema';
 
 @Injectable()
 export class ScrollingService {
-  constructor(@InjectModel('Pet') private readonly petModel: Model<Pet>) {}
+  constructor(
+    @InjectModel('Pet') private readonly petModel: Model<Pet>,
+    @InjectModel(User.name) private userModel: Model<UserDocument>,
+  ) {}
 
   async getPetbyIndex(id: string): Promise<Pet | { error: string }> {
     const index = parseInt(id);
@@ -22,7 +26,7 @@ export class ScrollingService {
   }
 
   async getAll(): Promise<Pet[]> {
-    return this.petModel.find().exec();
+    return this.petModel.find();
   }
 
   async getPetbyName(name: string): Promise<Pet[] | { error: string }> {
@@ -38,12 +42,16 @@ export class ScrollingService {
   }
 
   async match(userId: ObjectId): Promise<Pet[] | { message: string }> {
-    const allAnimals = this.getAll();
-    const user = await this.petModel.findById(userId).exec();
+    const allAnimals = await this.getAll();
+    if (allAnimals.length === 0) {
+      return { message: 'No pets found.' };
+    }
+
+    const user = await this.userModel.findById(userId);
     if (user) {
       return matchAnimals(user, allAnimals);
     }
 
-    return { message: 'No pets found.' };
+    return { message: 'User not found.' };
   }
 }
