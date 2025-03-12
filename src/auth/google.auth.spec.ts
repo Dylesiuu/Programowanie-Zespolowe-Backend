@@ -65,7 +65,11 @@ describe('GoogleAuth', () => {
     const done = jest.fn();
     await googleAuth.validate('accessToken', 'refreshToken', profile, done);
 
-    expect(done.mock.calls[0][1]).toEqual({ token: 'test-token' });
+    expect(done.mock.calls[0][0]).toBe(null);
+    expect(done.mock.calls[0][1]).toEqual({
+      token: 'test-token',
+      userId: user._id,
+    });
   });
 
   it('should create a new user and return a token if the user does not exist', async () => {
@@ -79,6 +83,7 @@ describe('GoogleAuth', () => {
       save: jest
         .fn()
         .mockResolvedValue({ email: 'john.doe@example.pl', _id: '123' }),
+      _id: '123',
     };
     userModel.create.mockReturnValue(newUser as any);
 
@@ -88,7 +93,10 @@ describe('GoogleAuth', () => {
     await googleAuth.validate('accessToken', 'refreshToken', profile, done);
 
     expect(done.mock.calls[0][0]).toBe(null);
-    expect(done.mock.calls[0][1]).toEqual({ token: 'test-token' });
+    expect(done.mock.calls[0][1]).toEqual({
+      token: 'test-token',
+      userId: '123',
+    });
   });
 
   it('should handle internal server errors and call done with an error', async () => {

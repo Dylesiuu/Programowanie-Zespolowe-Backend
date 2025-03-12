@@ -40,21 +40,20 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
       if (user) {
         const payload = { email: user.email, sub: user._id };
         const token = this.jwtService.sign(payload);
-        done(null, { token });
+        done(null, { token, userId: user._id });
       } else {
         const newUser = await this.userModel.create({
           name: name.givenName,
           lastname: name.familyName,
           email: emails[0].value,
           password: 'google-oauth',
-          favourites: [],
         });
 
         await newUser.save();
 
         const payload = { email: newUser.email, sub: newUser._id };
         const token = this.jwtService.sign(payload);
-        done(null, { token });
+        done(null, { token, userId: newUser._id });
       }
     } catch (error) {
       if (error instanceof UnauthorizedException) {
