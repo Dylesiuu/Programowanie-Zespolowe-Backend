@@ -55,6 +55,7 @@ export class AuthController {
   async googleAuthRedirect(@Req() req) {
     const user = req.user;
     const token = user.token;
-    return { message: 'User logged successfully', token };
+    const userId = user.userId;
+    return { message: 'User logged successfully', token, userId };
   }
 }

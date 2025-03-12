@@ -37,6 +37,9 @@ export class User {
   @Prop({ required: true })
   password: string;
 
+  @Prop({ default: [] })
+   favourites: number[];
+
   @Prop({ type: [TraitSchema], default: [], _id: false }) 
   traits: Trait[];
   
