@@ -19,7 +19,11 @@ export class AuthService {
     const userExist = await this.userModel.findOne({ email });
 
     if (userExist) {
-      return { message: 'User with this email already exists', token: null };
+      return {
+        message: 'User with this email already exists',
+        token: null,
+        userId: null,
+      };
     }
 
     const hashedpassword = await bcrypt.hash(password, 12);
@@ -36,14 +40,14 @@ export class AuthService {
     const payload = { email: user.email, sub: user._id };
     const token = this.jwtService.sign(payload);
 
-    return { message: 'User registered successfully', token };
+    return { message: 'User registered successfully', token, userId: user._id };
   }
 
   async login(email: string, password: string) {
     const userExist = await this.userModel.findOne({ email });
 
     if (!userExist) {
-      return { message: 'User does not exist', token: null };
+      return { message: 'User does not exist', token: null, userId: null };
     }
 
     const valid = await bcrypt.compare(password, userExist.password);
@@ -51,9 +55,13 @@ export class AuthService {
     if (valid) {
       const payload = { email: userExist.email, sub: userExist._id };
       const token = this.jwtService.sign(payload);
-      return { message: 'User logged successfully', token };
+      return {
+        message: 'User logged successfully',
+        token,
+        userId: userExist._id,
+      };
     }
 
-    return { message: 'Bad password', token: null };
+    return { message: 'Bad password', token: null, userId: null };
   }
 }
