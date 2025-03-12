@@ -9,7 +9,7 @@ interface Trait {
   name: string;
 }
 
-@Schema()  
+@Schema()
 class TraitClass {
   @Prop({ required: true })
   tagId: number;
@@ -38,11 +38,10 @@ export class User {
   password: string;
 
   @Prop({ default: [] })
-   favourites: number[];
+  favourites: number[];
 
-  @Prop({ type: [TraitSchema], default: [], _id: false }) 
+  @Prop({ type: [TraitSchema], default: [], _id: false })
   traits: Trait[];
-  
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

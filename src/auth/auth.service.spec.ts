@@ -57,7 +57,11 @@ describe('AuthService', () => {
     userModel.findOne.mockResolvedValue(null);
     userModel.create.mockResolvedValue({
       ...newUserData,
-      save: jest.fn().mockResolvedValue(newUserData),
+      _id: '123',
+      save: jest.fn().mockResolvedValue({
+        ...newUserData,
+        _id: '123',
+      }),
     } as any);
 
     (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
@@ -71,16 +75,18 @@ describe('AuthService', () => {
       name: newUserData.name,
       lastname: newUserData.lastname,
       email: newUserData.email,
-      password: expect.any(String),
+      password: expect.not.stringMatching(newUserData.password),
     });
 
     expect(jwtService.sign).toHaveBeenCalledWith({
       email: newUserData.email,
-      sub: undefined,
+      sub: '123',
     });
+
     expect(res).toEqual({
       message: 'User registered successfully',
       token: 'mocked-jwt-token',
+      userId: '123',
     });
   });
 
@@ -97,23 +103,19 @@ describe('AuthService', () => {
     const errors = await validate(newUserDataDto);
     expect(errors.length).toBe(0);
 
-    userModel.findOne.mockResolvedValueOnce(null);
-    userModel.create.mockResolvedValue({
-      ...newUserData,
-      save: jest.fn().mockResolvedValue(newUserData),
-    } as any);
-
     (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
 
-    await service.register(newUserDataDto);
-
-    userModel.findOne.mockResolvedValueOnce(newUserData);
+    userModel.findOne.mockResolvedValueOnce({
+      ...newUserData,
+      _id: '123',
+    } as any);
 
     const res = await service.register(newUserDataDto);
 
     expect(res).toEqual({
       message: 'User with this email already exists',
       token: null,
+      userId: null,
     });
   });
 
@@ -132,19 +134,13 @@ describe('AuthService', () => {
 
     const hashedPassword = await bcrypt.hash(newUserData.password, 12);
 
-    userModel.findOne.mockResolvedValueOnce(null);
-    userModel.create.mockResolvedValue({
-      ...newUserData,
-      password: hashedPassword,
-      save: jest.fn().mockResolvedValue(newUserData),
-    } as any);
-
-    await service.register(newUserDataDto);
-
     userModel.findOne.mockResolvedValueOnce({
       ...newUserData,
       password: hashedPassword,
+      _id: '123',
     } as any);
+
+    (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
 
     const res = await service.login(newUserData.email, newUserData.password);
 
@@ -152,7 +148,11 @@ describe('AuthService', () => {
       email: newUserData.email,
     });
 
-    expect(res.message).toEqual('User logged successfully');
+    expect(res).toEqual({
+      message: 'User logged successfully',
+      token: 'mocked-jwt-token',
+      userId: '123',
+    });
   });
 
   it('should not allow login of a non existing user', async () => {
@@ -171,7 +171,11 @@ describe('AuthService', () => {
       email: newUserData.email,
     });
 
-    expect(res.message).toEqual('User does not exist');
+    expect(res).toEqual({
+      message: 'User does not exist',
+      token: null,
+      userId: null,
+    });
   });
 
   it('should not allow login with wrong password', async () => {
@@ -189,18 +193,10 @@ describe('AuthService', () => {
 
     const hashedPassword = await bcrypt.hash(newUserData.password, 12);
 
-    userModel.findOne.mockResolvedValueOnce(null);
-    userModel.create.mockResolvedValue({
-      ...newUserData,
-      password: hashedPassword,
-      save: jest.fn().mockResolvedValue(newUserData),
-    } as any);
-
-    await service.register(newUserDataDto);
-
     userModel.findOne.mockResolvedValueOnce({
       ...newUserData,
       password: hashedPassword,
+      _id: '123',
     } as any);
 
     const res = await service.login(
@@ -212,6 +208,10 @@ describe('AuthService', () => {
       email: newUserData.email,
     });
 
-    expect(res.message).toEqual('Bad password');
+    expect(res).toEqual({
+      message: 'Bad password',
+      token: null,
+      userId: null,
+    });
   });
 });
