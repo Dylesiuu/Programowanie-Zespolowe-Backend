@@ -10,28 +10,33 @@ const mockUser = {
   name: 'Geralt',
   lastname: 'z Rivii',
   password: 'Zaraza123',
-  favourites: [1, 2, 3],
+  traits: [
+    { tagId: 1, priority: 1, name: 'Warrior' },
+    { tagId: 2, priority: 2, name: 'Strategist' },
+  ],
 };
 
 const mockUserModel = {
   findOne: jest.fn().mockImplementation(({ email }) =>
-    email === mockUser.email ? { exec: jest.fn().mockResolvedValue(mockUser) } : { exec: jest.fn().mockResolvedValue(null) }
+    email === mockUser.email 
+      ? { exec: jest.fn().mockResolvedValue(mockUser) }
+      : { exec: jest.fn().mockResolvedValue(null) }
   ),
   find: jest.fn().mockImplementation(() => ({
     exec: jest.fn().mockResolvedValue([mockUser]),
   })),
   findOneAndUpdate: jest.fn().mockImplementation((query, update) => {
-    const updatedUser = { ...mockUser, ...update };
+    const updatedUser = { ...mockUser , ...update };
 
-    if (update.$push && update.$push.favourites) {
-      updatedUser.favourites.push(update.$push.favourites);
+    if (update.$push && update.$push.traits) {
+      updatedUser.traits.push(update.$push.traits);
     }
-    if (update.$pull && update.$pull.favourites) {
-      updatedUser.favourites = updatedUser.favourites.filter(fav => fav !== update.$pull.favourites);
+    if (update.$pull && update.$pull.traits) {
+      updatedUser.traits = updatedUser.traits.filter(trait => trait.tagId !== update.$pull.traits.tagId);
     }
 
     return {
-      exec: jest.fn().mockResolvedValue(updatedUser),  
+      exec: jest.fn().mockResolvedValue(updatedUser),
     };
   }),
 };
@@ -95,24 +100,34 @@ describe('UserService', () => {
     expect(updatedUser.password).toBeDefined();
   });
 
-  it('should return true if favourite exists', async () => {
-    const exists = await service.isFavouriteExists('Geralt@rivia.com', 2);
+  it('should return true if trait exists', async () => {
+    const exists = await service.doesTraitExist('Geralt@rivia.com', 1);
     expect(exists).toBe(true);
   });
 
-  it('should return false if favourite does not exist', async () => {
-    const exists = await service.isFavouriteExists('Geralt@rivia.com', 99);
+  it('should return false if trait does not exist', async () => {
+    const exists = await service.doesTraitExist('Geralt@rivia.com', 99);
     expect(exists).toBe(false);
   });
 
-  it('should add favourite', async () => {
-    const updatedUser = await service.addFavourite('Geralt@rivia.com', 99);
-    expect(updatedUser.favourites).toContain(99);
+  it('should add trait', async () => {
+    const newTrait = { tagId: 3, priority: 1, name: 'Mage' };
+    const updatedUser = await service.addTrait('Geralt@rivia.com', newTrait);
+    expect(updatedUser.traits).toContainEqual(newTrait);
+    expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+      { email: 'Geralt@rivia.com' },
+      { $push: { traits: newTrait } },
+      { new: true }
+    );
   });
 
-  it('should remove favourite', async () => {
-    const updatedUser = await service.removeFavourite('Geralt@rivia.com', 2);
-    expect(updatedUser.favourites).not.toContain(2);
+  it('should remove trait', async () => {
+    const updatedUser = await service.removeTrait('Geralt@rivia.com', 1); 
+    expect(updatedUser.traits).not.toContainEqual(expect.objectContaining({ tagId: 1 }));
+    expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+      { email: 'Geralt@rivia.com' },
+      { $pull: { traits: { tagId: 1 } } },
+      { new: true }
+    );
   });
-
 });

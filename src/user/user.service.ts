@@ -1,11 +1,8 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../auth/schemas/user.schema';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { CreateUserDto } from '../auth/dto/create-user.dto';
-import { plainToInstance } from 'class-transformer';
-import { validate } from 'class-validator';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -40,22 +37,49 @@ export class UserService {
     ).exec();
   }
 
-  async isFavouriteExists(email: string, favouriteId: number): Promise<boolean> {
+  async doesTraitExist(email: string, tagId: number): Promise<boolean> {
     const user = await this.userModel.findOne({ email }).exec();
-    if (!user) return false;
-    return user.favourites.includes(favouriteId);
+    if (!user) throw new NotFoundException('User not found');
+
+    if (!user.traits) {
+      return false;
+    }
+
+    return user.traits.some((trait) => trait.tagId === Number(tagId));
   }
 
-  async addFavourite(email: string, favouriteId: number): Promise<User | null> {
-    if (await this.isFavouriteExists(email, favouriteId)) return null;
-    return this.userModel.findOneAndUpdate({ email }, { $push: { favourites: favouriteId } }, { new: true }).exec();
+  async addTrait(email: string, trait: { tagId: number; priority: number; name: string }) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+
+    user.traits = user.traits || [];
+
+    const exists = await this.doesTraitExist(email, trait.tagId);
+    if (exists) throw new BadRequestException('Trait already exists');
+
+    user.traits.push(trait);
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { $push: { traits: trait } },
+      { new: true }
+    ).exec();
   }
 
-  async removeFavourite(email: string, favouriteId: number): Promise<User | null> {
-    if (!(await this.isFavouriteExists(email, favouriteId))) return null;
-    return this.userModel.findOneAndUpdate({ email }, { $pull: { favourites: favouriteId } }, { new: true }).exec();
+  async removeTrait(email: string, tagId: number) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+
+    user.traits = user.traits || [];
+
+    const exists = await this.doesTraitExist(email, tagId);
+    if (!exists) throw new BadRequestException('Trait not found');
+
+    user.traits = user.traits.filter((trait) => trait.tagId !== tagId);
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { $pull: { traits: { tagId } } },
+      { new: true }
+    ).exec();
   }
-
-
 
 }

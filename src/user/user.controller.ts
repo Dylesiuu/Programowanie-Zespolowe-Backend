@@ -1,4 +1,4 @@
-import { Controller, Get, NotFoundException, Param, Patch, Body , UsePipes, ValidationPipe } from '@nestjs/common';
+import { Controller, Get, Delete, NotFoundException, Param, Patch, Body , UsePipes, ValidationPipe, ParseIntPipe, } from '@nestjs/common';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserService } from './user.service';
 import { User } from '../auth/schemas/user.schema';
@@ -18,25 +18,38 @@ export class UserController {
 
   @Get()
   async getAllUsers(): Promise<User[]> {
-    return this.userService.findAll();
+    const users = this.userService.findAll();
+
+    if (!users || (await users).length === 0) {
+      throw new NotFoundException('No users found');
+    }
+    return users;
   }
 
   @Patch('update-name/:email')
   async updateUserName(@Param('email') email: string, @Body('name') name: string): Promise<User> {
-    return this.userService.updateUserName(email, name);
+    const user = this.userService.updateUserName(email, name);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } 
+    return user;
   }
+
+  
 
   @Patch('update-lastname/:email')
   async updateUserLastname(@Param('email') email: string, @Body('lastname') lastname: string): Promise<User> {
-    return this.userService.updateUserLastname(email, lastname);
+    const user = await this.userService.updateUserLastname(email, lastname);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    } 
+    return user;
   }
 
 
   @Patch('update-password/:email')
   @UsePipes(new ValidationPipe())
-  async updatePassword(
-    @Param('email') email: string,
-    @Body() updatePasswordDto: UpdatePasswordDto
+  async updatePassword(@Param('email') email: string, @Body() updatePasswordDto: UpdatePasswordDto
   ) {
     const updatedUser = await this.userService.updateUserPassword(email, updatePasswordDto);
     if (updatedUser) {
@@ -46,22 +59,20 @@ export class UserController {
     }
   }
 
-  @Patch('add-favourite/:email/:favouriteId')
-  async addFavourite(@Param('email') email: string, @Param('favouriteId') favouriteId: number): Promise<User> {
-    const user = await this.userService.addFavourite(email, favouriteId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+
+  @Patch(':email/traits')
+  async addTrait(
+    @Param('email') email: string,
+    @Body() trait: { tagId: number; priority: number; name: string },
+  ): Promise<User> {
+    
+    return this.userService.addTrait(email, trait);
   }
 
-  @Patch('remove-favourite/:email/:favouriteId')
-  async removeFavourite(@Param('email') email: string, @Param('favouriteId') favouriteId: number): Promise<User> {
-    const user = await this.userService.removeFavourite(email, favouriteId);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+
+  @Delete(':email/traits/:tagId')
+  async removeTrait(@Param('email') email: string, @Param('tagId', ParseIntPipe) tagId: number): Promise<User> {
+    return this.userService.removeTrait(email, tagId);
   }
 
 }
