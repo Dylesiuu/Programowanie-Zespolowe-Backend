@@ -7,17 +7,56 @@ import {
   UnauthorizedException,
   UseGuards,
   Req,
-  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { AuthGuard } from '@nestjs/passport';
+import {
+  ApiBody,
+  ApiConflictResponse,
+  ApiOperation,
+  ApiResponse,
+  ApiTags,
+} from '@nestjs/swagger';
 
+@ApiTags('AuthenticationController')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('register')
+  @ApiOperation({ summary: 'Register a new user' })
+  @ApiResponse({
+    status: 201,
+    description: 'User successfully registered.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User registered successfully' },
+        token: {
+          type: 'string',
+          example:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjIsInJvbGUiOiJ1c2VyIn0.5mhBHqs5_DTLdINd9p5m7ZJ6XD0Xc55kIaCRY5r6HRA',
+        },
+        userId: { type: 'number', example: 1 },
+      },
+    },
+  })
+  @ApiConflictResponse({
+    description: 'User with this email already exists',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'User with this email already exists',
+        },
+        error: { type: 'string', example: 'Conflict' },
+        statusCode: { type: 'number', example: 409 },
+      },
+    },
+  })
+  @ApiBody({ type: CreateUserDto })
   async register(@Body() createUserDto: CreateUserDto) {
     const res = await this.authService.register(createUserDto);
 
