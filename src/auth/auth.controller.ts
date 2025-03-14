@@ -17,6 +17,7 @@ import {
   ApiOperation,
   ApiResponse,
   ApiTags,
+  ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 
 @ApiTags('AuthenticationController')
@@ -68,6 +69,54 @@ export class AuthController {
   }
 
   @Post('login')
+  @ApiOperation({ summary: 'Login a user' })
+  @ApiResponse({
+    status: 200,
+    description: 'User successfully logged in.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User logged successfully' },
+        token: {
+          type: 'string',
+          example:
+            'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvcmRhbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MTUxNjI0MjYyMiwicm9sZSI6InVzZXIifQ.5mhBHqs5_DTLdINd9p5m7ZJ6XD0Xc55kIaCRY5r6HRA',
+        },
+        userId: { type: 'number', example: 1 },
+      },
+    },
+  })
+  @ApiConflictResponse({
+    description: 'Bad password',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'Bad password' },
+        error: { type: 'string', example: 'Conflict' },
+        statusCode: { type: 'number', example: 409 },
+      },
+    },
+  })
+  @ApiUnauthorizedResponse({
+    description: 'User does not exist',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User does not exist' },
+        error: { type: 'string', example: 'Unauthorized' },
+        statusCode: { type: 'number', example: 401 },
+      },
+    },
+  })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        email: { type: 'string', example: 'example@example.com' },
+        password: { type: 'string', example: 'haslO2452345923582fnw823#' },
+      },
+    },
+  })
   async login(
     @Body('email') email: string,
     @Body('password') password: string,
