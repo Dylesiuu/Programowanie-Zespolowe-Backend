@@ -5,7 +5,7 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { getModelToken } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { mock } from 'jest-mock-extended';
