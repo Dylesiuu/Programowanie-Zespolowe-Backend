@@ -5,7 +5,7 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Pet } from './schema/pet.schema';
 import { mock } from 'jest-mock-extended';
-import { User, UserDocument } from '../auth/schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 
 // const mockPetsTable = [
 //   { id: 1, name: "Pomelo",    age: '2 lata'},
