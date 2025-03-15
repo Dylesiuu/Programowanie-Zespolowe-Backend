@@ -4,7 +4,7 @@ import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Pet } from './schema/pet.schema';
 import { matchAnimals } from '../utils/matchAnimals';
-import { User, UserDocument } from '../auth/schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 
 @Injectable()
 export class ScrollingService {
