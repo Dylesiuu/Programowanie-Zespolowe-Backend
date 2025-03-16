@@ -30,7 +30,7 @@ export class ScrollingService {
     if (isNaN(index) || index < 0) {
       return { error: 'Index is Invalid.' };
     }
-    const result = await this.petModel.findOne({ id: index }).exec();
+    const result = await this.petModel.findOne({ id: index });
     if (!result) {
       return { error: 'Pet not found.' };
     }
@@ -42,15 +42,33 @@ export class ScrollingService {
   }
 
   async getPetbyName(name: string): Promise<Pet[] | { error: string }> {
-    const matchingPets = await this.petModel.find({
-      name: new RegExp(`^${name}$`, 'i'),
-    });
-
-    if (matchingPets.length === 0) {
-      return { error: 'Pet with that name not found.' };
+    if (!name || typeof name !== 'string') {
+      return { error: 'Invalid name input.' };
     }
 
-    return matchingPets;
+    if (!/^[a-zA-Z0-9\s]+$/.test(name)) {
+      return { error: 'Name can only contain letters, numbers, and spaces.' };
+    }
+
+    if (name.length > 50) {
+      return { error: 'Name is too long.' };
+    }
+
+    const sanitizedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+    try {
+      const matchingPets = await this.petModel.find({
+        name: { $regex: `^${sanitizedName}$`, $options: 'i' },
+      });
+
+      if (matchingPets.length === 0) {
+        return { error: 'Pet with that name not found.' };
+      }
+
+      return matchingPets;
+    } catch (error) {
+      return { error: 'An error occurred while fetching pets.' };
+    }
   }
 
   async match(
@@ -70,10 +88,10 @@ export class ScrollingService {
     }
 
     const userWithTraits = (
-      await this.userModel.findById(userId).populate('traits').exec()
+      await this.userModel.findById(userId).populate('traits')
     ).toObject();
 
-    const allAnimalsTmp = await this.petModel.find().populate('traits').exec();
+    const allAnimalsTmp = await this.petModel.find().populate('traits');
 
     const allAnimalsWithTraits = allAnimalsTmp.map((animal) =>
       animal.toObject(),
