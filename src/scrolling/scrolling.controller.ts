@@ -1,4 +1,4 @@
-import { Controller, Get, Param } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
 import { ObjectId } from 'mongodb';
 
@@ -10,25 +10,29 @@ export class ScrollingController {
     this.scrollingService = scrollingService;
   }
 
-  // @Get(':arg')
-  // getData(@Param('arg') arg: string) {
-  //   const isInteger = (value: string): boolean => {
-  //     return !isNaN(parseInt(value, 10));
-  //   };
-  //   if (isInteger(arg)) {
-  //     return this.scrollingService.getPetbyIndex(arg);
-  //   } else {
-  //     return this.scrollingService.getPetbyName(arg);
-  //   }
-  // }
+  @Get(':arg')
+  getData(@Param('arg') arg: string) {
+    const isInteger = (value: string): boolean => {
+      return !isNaN(parseInt(value, 10));
+    };
+    if (isInteger(arg)) {
+      return this.scrollingService.getPetbyIndex(arg);
+    } else {
+      return this.scrollingService.getPetbyName(arg);
+    }
+  }
 
   @Get('')
   gatAllPet() {
     return this.scrollingService.getAll();
   }
 
-  @Get(':userId')
-  match(@Param('userId') userId: string) {
+  @Post('match')
+  async match(
+    @Body('userId') userId: string,
+    @Body('lng') lng: number,
+    @Body('lat') lat: number,
+  ) {
     const result = this.scrollingService.match(new ObjectId(userId));
 
     if (result.message === 'User not found.') {
