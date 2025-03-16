@@ -1,6 +1,7 @@
 import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
 import { ObjectId } from 'mongodb';
+import mongoose from 'mongoose';
 
 @Controller('scrolling')
 export class ScrollingController {
@@ -12,10 +13,10 @@ export class ScrollingController {
 
   @Get(':arg')
   getData(@Param('arg') arg: string) {
-    const isInteger = (value: string): boolean => {
-      return !isNaN(parseInt(value, 10));
+    const isObjectId = (value: string): boolean => {
+      return mongoose.isValidObjectId(value);
     };
-    if (isInteger(arg)) {
+    if (isObjectId(arg)) {
       return this.scrollingService.getPetbyIndex(arg);
     } else {
       return this.scrollingService.getPetbyName(arg);
