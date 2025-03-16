@@ -1,6 +1,6 @@
 import { Controller, Get, Param } from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
-import { ObjectId } from 'mongoose';
+import { ObjectId } from 'mongodb';
 
 @Controller('scrolling')
 export class ScrollingController {
@@ -10,17 +10,17 @@ export class ScrollingController {
     this.scrollingService = scrollingService;
   }
 
-  @Get(':arg')
-  getData(@Param('arg') arg: string) {
-    const isInteger = (value: string): boolean => {
-      return !isNaN(parseInt(value, 10));
-    };
-    if (isInteger(arg)) {
-      return this.scrollingService.getPetbyIndex(arg);
-    } else {
-      return this.scrollingService.getPetbyName(arg);
-    }
-  }
+  // @Get(':arg')
+  // getData(@Param('arg') arg: string) {
+  //   const isInteger = (value: string): boolean => {
+  //     return !isNaN(parseInt(value, 10));
+  //   };
+  //   if (isInteger(arg)) {
+  //     return this.scrollingService.getPetbyIndex(arg);
+  //   } else {
+  //     return this.scrollingService.getPetbyName(arg);
+  //   }
+  // }
 
   @Get('')
   gatAllPet() {
@@ -28,7 +28,17 @@ export class ScrollingController {
   }
 
   @Get(':userId')
-  match(@Param('userId') userId: ObjectId) {
-    return this.scrollingService.match(userId);
+  match(@Param('userId') userId: string) {
+    const result = this.scrollingService.match(new ObjectId(userId));
+
+    if (result.message === 'User not found.') {
+      throw new Error('User not found.');
+    }
+
+    if (result.message === 'No pets found.') {
+      return { message: 'No pets found.' };
+    }
+
+    return result;
   }
 }

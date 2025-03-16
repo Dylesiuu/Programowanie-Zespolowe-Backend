@@ -1,24 +1,32 @@
-function calculateScore(user, animal) {
+function calculateScore(userTraits, animalTraits) {
   let score = 0;
-  for (const tag of user.traits) {
-    const index = tag.tagId;
-    const priority = tag.priority;
 
-    const animalTag = animal.traits.find((tag) => tag.tagId === index);
+  for (const animalTrait of animalTraits) {
+    score -= animalTrait.priority;
+  }
 
-    if (animalTag) {
-      score += priority;
+  for (const userTrait of userTraits) {
+    for (const animalTraitIndex of userTrait.animalTraits) {
+      const matchingAnimalTrait = animalTraits.find((animalTrait) =>
+        animalTrait._id.equals(animalTraitIndex),
+      );
+
+      if (matchingAnimalTrait) {
+        score += matchingAnimalTrait.priority;
+      }
     }
   }
 
   return score;
 }
 
-export function matchAnimals(user, animals) {
-  const newAnimalsArray = animals.map((animal) => ({
-    ...animal,
-    score: calculateScore(user, animal),
-  }));
+export function matchAnimals(user, allAnimals) {
+  const newAnimalsArray = allAnimals
+    .map((animal) => ({
+      ...animal,
+      score: calculateScore(user.traits, animal.traits),
+    }))
+    .filter((animal) => animal.score >= -15);
 
   const sortedAnimalsArray = newAnimalsArray.sort((a, b) => b.score - a.score);
 

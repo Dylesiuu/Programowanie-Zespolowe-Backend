@@ -6,12 +6,19 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { Pet, PetSchema } from './schema/pet.schema';
 import { User, UserSchema } from '../user/schemas/user.schema';
 import { JwtModule } from '@nestjs/jwt';
+import {
+  AnimalTrait,
+  AnimalTraitSchema,
+} from 'src/traits/schemas/animalTrait.schema';
+import { UserTrait, UserTraitSchema } from '../traits/schemas/userTrait.schema';
 
 @Module({
   imports: [
     MongooseModule.forFeature([
       { name: Pet.name, schema: PetSchema },
       { name: User.name, schema: UserSchema },
+      { name: UserTrait.name, schema: UserTraitSchema },
+      { name: AnimalTrait.name, schema: AnimalTraitSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],
