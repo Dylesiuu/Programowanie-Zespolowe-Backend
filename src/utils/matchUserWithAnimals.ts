@@ -20,7 +20,7 @@ function calculateScore(userTraits, animalTraits) {
   return score;
 }
 
-export function matchAnimals(user, allAnimals) {
+export function matchUserWithAnimals(user, allAnimals) {
   const newAnimalsArray = allAnimals
     .map((animal) => ({
       ...animal,
