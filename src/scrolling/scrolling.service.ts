@@ -3,7 +3,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Pet } from './schema/pet.schema';
-import { matchAnimals } from '../utils/matchAnimals';
+import { matchUserWithAnimals } from '../utils/matchUserWithAnimals';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import {
   UserTrait,
@@ -79,7 +79,7 @@ export class ScrollingService {
       animal.toObject(),
     );
 
-    const result = matchAnimals(userWithTraits, allAnimalsWithTraits);
+    const result = matchUserWithAnimals(userWithTraits, allAnimalsWithTraits);
 
     return {
       message: 'Matched animals',
