@@ -11,44 +11,51 @@ import {
   UserTraitDocument,
 } from '../traits/schemas/userTrait.schema';
 import {
-  AnimalTraits,
-  AnimalTraitsDocument,
+  AnimalTrait,
+  AnimalTraitDocument,
 } from '../traits/schemas/animalTrait.schema';
+import { populate } from 'dotenv';
 
 const mockPet = [
   {
-    id: 0,
+    _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
     name: 'Spongebob',
     age: '1 rok',
     discribtion: 'pochodzi z warszawy',
     gender: 'Pies',
     location: 'Warszawa',
     shelter: 'Schronisko na Paluchu',
-    traits: [1, 2],
+    traits: [
+      new ObjectId('507f1f77bcf86cd799439011'),
+      new ObjectId('5f50c31b1c9d440000a1b2c3'),
+    ],
     image:
       'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
   },
   {
-    id: 1,
+    _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
     name: 'Pomelo',
     age: '2 lata',
     discribtion: 'pochodzi z torunia',
     gender: 'Suka',
     location: 'Toruń',
     shelter: 'Schronisko dla zwierząt w Toruniu',
-    traits: [3],
+    traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
     image:
       'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
   },
   {
-    id: 2,
+    _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
     name: 'Spongebob',
     age: '4 lata',
     discribtion: 'pochodzi z bydgoszczy',
     gender: 'Pies',
     location: 'Bydgoszcz',
     shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
-    traits: [1, 4],
+    traits: [
+      new ObjectId('507f1f77bcf86cd799439011'),
+      new ObjectId('4e4d5a7f1a2b3c4d5e6f7a89'),
+    ],
     image:
       'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
   },
@@ -62,7 +69,7 @@ const mockUsers = [
     email: 'jan.kowalski@example.com',
     password: 'securepassword123',
     favourites: [0, 2],
-    traits: [1],
+    traits: [new ObjectId('65f1a2b3c4d5e6f7a8b9c0d1')],
   },
   {
     _id: new ObjectId('65f4c8e9f0a5a4d3b4a67890'),
@@ -71,7 +78,7 @@ const mockUsers = [
     email: 'anna.nowak@example.com',
     password: 'strongpass456',
     favourites: [1],
-    traits: [2],
+    traits: [new ObjectId('55e4d5a7f1a2b3c4d5e6f7a8')],
   },
   {
     _id: new ObjectId('65f4c8e9f0a5a4d3b4a54321'),
@@ -80,46 +87,57 @@ const mockUsers = [
     email: 'piotr.wisniewski@example.com',
     password: 'mypassword789',
     favourites: [0, 1, 2],
-    traits: [2, 3],
+    traits: [
+      new ObjectId('55e4d5a7f1a2b3c4d5e6f7a8'),
+      new ObjectId('70c72b2f9b1d8e4a5f6e7d8c'),
+    ],
   },
 ];
 
 const mockUserTraits = [
   {
-    tagId: 1,
+    _id: new ObjectId('65f1a2b3c4d5e6f7a8b9c0d1'),
     name: 'Trait 1',
-    animalsTraits: [1, 2, 4],
+    animalTraits: [
+      new ObjectId('507f1f77bcf86cd799439011'),
+      new ObjectId('5f50c31b1c9d440000a1b2c3'),
+      new ObjectId('4e4d5a7f1a2b3c4d5e6f7a89'),
+    ],
   },
   {
-    tagId: 2,
+    _id: new ObjectId('55e4d5a7f1a2b3c4d5e6f7a8'),
     name: 'Trait 2',
-    animalsTraits: [3, 5, 7],
+    animalTraits: [
+      new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8'),
+      new ObjectId('60c72b2f9b1d8e4a5f6e7d8c'),
+      new ObjectId('65a1b2c3d4e5f6a7b8c9d0e1'),
+    ],
   },
   {
-    tagId: 3,
+    _id: new ObjectId('70c72b2f9b1d8e4a5f6e7d8c'),
     name: 'Trait 3',
-    animalsTraits: [6, 8, 9],
+    animalTraits: [new ObjectId('55a4d5a7f1a2b3c4d5e6f7a8')],
   },
 ];
 
 const mockAnimalTraits = [
   {
-    tagId: 1,
+    _id: new ObjectId('507f1f77bcf86cd799439011'),
     name: 'Trait 1',
     priority: 1,
   },
   {
-    tagId: 2,
+    _id: new ObjectId('5f50c31b1c9d440000a1b2c3'),
     name: 'Trait 2',
     priority: 2,
   },
   {
-    tagId: 3,
+    _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8'),
     name: 'Trait 3',
     priority: 3,
   },
   {
-    tagId: 4,
+    _id: new ObjectId('4e4d5a7f1a2b3c4d5e6f7a89'),
     name: 'Trait 4',
     priority: 4,
   },
@@ -136,10 +154,10 @@ const mockPetModel = {
 
 describe('ScrollingService', () => {
   let service: ScrollingService;
-  let model: Model<Pet>;
+  const petModel = mock<Model<Pet>>();
   const userModel = mock<Model<UserDocument>>();
-  const userTraitsModel = mock<Model<UserTraitDocument>>();
-  const animalTraitsModel = mock<Model<AnimalTraitsDocument>>();
+  const userTraitModel = mock<Model<UserTraitDocument>>();
+  const animalTraitModel = mock<Model<AnimalTraitDocument>>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -149,17 +167,16 @@ describe('ScrollingService', () => {
           provide: getModelToken(User.name),
           useValue: userModel,
         },
-        { provide: getModelToken('Pet'), useValue: mockPetModel },
-        { provide: getModelToken(UserTrait.name), useValue: userTraitsModel },
+        { provide: getModelToken(Pet.name), useValue: petModel },
+        { provide: getModelToken(UserTrait.name), useValue: userTraitModel },
         {
-          provide: getModelToken(AnimalTraits.name),
-          useValue: animalTraitsModel,
+          provide: getModelToken(AnimalTrait.name),
+          useValue: animalTraitModel,
         },
       ],
     }).compile();
 
     service = module.get<ScrollingService>(ScrollingService);
-    model = module.get<Model<Pet>>(getModelToken(Pet.name));
   });
 
   afterEach(() => {
@@ -172,31 +189,17 @@ describe('ScrollingService', () => {
 
   // test 2: zwracanie danych
   it('should return a pet by id', async () => {
-    const mockQuery = {
-      exec: jest.fn().mockResolvedValue(mockPet[1]),
-    };
+    jest.spyOn(petModel, 'findOne').mockResolvedValue(mockPet[1]);
 
-    jest.spyOn(model, 'findOne').mockReturnValue(mockQuery as any);
-
-    const result = await service.getPetbyIndex('1');
+    const result = await service.getPetbyIndex(mockPet[1]._id.toString());
     expect(result).toEqual(mockPet[1]);
-    expect(model.findOne).toHaveBeenCalledWith({ id: 1 });
+    expect(petModel.findOne).toHaveBeenCalledWith({ id: mockPet[1]._id });
   });
 
-  //test 3: zły indeks(wartosc poza zakresem)
-  it('return error for id out of range', async () => {
-    const result = await service.getPetbyIndex('-1');
-    expect(result).toEqual({ error: 'Index is Invalid.' });
-  });
-
-  //test 4: zły indeks(wartosc poza zakresem)
   it('return rerror for index not in table', async () => {
-    const mockQuery = {
-      exec: jest.fn().mockResolvedValue(null),
-    };
-    jest.spyOn(model, 'findOne').mockReturnValue(mockQuery as any);
+    jest.spyOn(petModel, 'findOne').mockReturnValue(null);
 
-    const result = await service.getPetbyIndex('5');
+    const result = await service.getPetbyIndex('507f1f77bcf86cd799439011');
     expect(result).toEqual({ error: 'Pet not found.' });
   });
 
@@ -208,7 +211,7 @@ describe('ScrollingService', () => {
 
   // test 6: zwracanie danych z nazwy
   it('return item from table of name', async () => {
-    jest.spyOn(model, 'find').mockResolvedValue([mockPet[1]]);
+    jest.spyOn(petModel, 'find').mockResolvedValue([mockPet[1]]);
 
     const result = await service.getPetbyName('Pomelo');
     expect(result).toEqual([mockPet[1]]);
@@ -216,52 +219,152 @@ describe('ScrollingService', () => {
 
   //test 7: zła nazwa
   it('return error cause name not found', async () => {
-    jest.spyOn(model, 'find').mockResolvedValue([]);
+    jest.spyOn(petModel, 'find').mockResolvedValue([]);
     const result = await service.getPetbyName('5321');
     expect(result).toEqual({ error: 'Pet with that name not found.' });
   });
 
   //test 8: wiecej niz jeden pet z takim imieniem
   it('return more than one pet by name', async () => {
-    jest.spyOn(model, 'find').mockResolvedValue([mockPet[0], mockPet[2]]);
+    jest.spyOn(petModel, 'find').mockResolvedValue([mockPet[0], mockPet[2]]);
     const result = await service.getPetbyName('Spongebob');
     expect(result).toEqual([mockPet[0], mockPet[2]]);
   });
 
   //test 9: zwracanie całej tablicy funkcją getAll
   it('return table by getAll function', async () => {
-    jest.spyOn(model, 'find').mockResolvedValue(mockPet);
+    jest.spyOn(petModel, 'find').mockResolvedValue(mockPet);
 
     const result = await service.getAll();
     expect(result).toEqual(mockPet);
   });
 
   it('should return matched animals if user is found', async () => {
-    jest.spyOn(model, 'find').mockResolvedValue(mockPet);
-    userModel.findById.mockResolvedValue(mockUsers[2]);
-    userTraitsModel.find.mockResolvedValue(mockUserTraits);
-    animalTraitsModel.find.mockResolvedValue(mockAnimalTraits);
+    const mockUserWithtraits = {
+      _id: new ObjectId('65f4c8e9f0a5a4d3b4a54321'),
+      name: 'Piotr',
+      lastname: 'Wiśniewski',
+      email: 'piotr.wisniewski@example.com',
+      password: 'mypassword789',
+      favourites: [0, 1, 2],
+      traits: [mockUserTraits[1], mockUserTraits[2]],
+    };
 
-    const res = await service.match(mockUsers[2]._id);
-    expect(res).toEqual({
-      matchedAnimals: expect.any(Array),
-      userWithTraits: expect.any(Object),
+    const mockAnimalWithTraits = [
+      {
+        _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
+        name: 'Spongebob',
+        age: '1 rok',
+        discribtion: 'pochodzi z warszawy',
+        gender: 'Pies',
+        location: 'Warszawa',
+        shelter: 'Schronisko na Paluchu',
+        traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
+        image:
+          'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
+        toObject: jest.fn().mockReturnValue({
+          _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
+          name: 'Spongebob',
+          age: '1 rok',
+          discribtion: 'pochodzi z warszawy',
+          gender: 'Pies',
+          location: 'Warszawa',
+          shelter: 'Schronisko na Paluchu',
+          traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
+          image:
+            'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
+        }),
+      },
+      {
+        _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
+        name: 'Pomelo',
+        age: '2 lata',
+        discribtion: 'pochodzi z torunia',
+        gender: 'Suka',
+        location: 'Toruń',
+        shelter: 'Schronisko dla zwierząt w Toruniu',
+        traits: [mockAnimalTraits[2]],
+        image:
+          'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+        toObject: jest.fn().mockReturnValue({
+          _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
+          name: 'Pomelo',
+          age: '2 lata',
+          discribtion: 'pochodzi z torunia',
+          gender: 'Suka',
+          location: 'Toruń',
+          shelter: 'Schronisko dla zwierząt w Toruniu',
+          traits: [mockAnimalTraits[2]],
+          image:
+            'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+        }),
+      },
+      {
+        _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
+        name: 'Spongebob',
+        age: '4 lata',
+        discribtion: 'pochodzi z bydgoszczy',
+        gender: 'Pies',
+        location: 'Bydgoszcz',
+        shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
+        traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
+        image:
+          'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
+        toObject: jest.fn().mockReturnValue({
+          _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
+          name: 'Spongebob',
+          age: '4 lata',
+          discribtion: 'pochodzi z bydgoszczy',
+          gender: 'Pies',
+          location: 'Bydgoszcz',
+          shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
+          traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
+          image:
+            'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
+        }),
+      },
+    ];
+
+    petModel.find.mockResolvedValue(mockPet);
+    userModel.findById.mockReturnValue({
+      populate: jest.fn().mockResolvedValue({
+        toObject: jest.fn().mockReturnValue(mockUserWithtraits),
+      }),
+    } as any);
+    petModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockAnimalWithTraits),
+    } as any);
+
+    const result = await service.match(mockUsers[2]._id);
+
+    const expectedResult = mockAnimalWithTraits.map((animal) => {
+      const { toObject, ...rest } = animal;
+      return rest;
+    });
+    console.log(expectedResult);
+
+    expect(result).toEqual({
+      message: 'Matched animals',
+      matchedAnimals: [expectedResult[1], expectedResult[0], expectedResult[2]],
+      userWithTraits: mockUserWithtraits,
     });
   });
 
-  // it('shuld return message if no pets found', async () => {
-  //   jest.spyOn(model, 'find').mockResolvedValue([]);
-  //   userModel.findById.mockResolvedValue(mockUsers[2]);
+  it('shuld return message if no pets found', async () => {
+    petModel.find.mockResolvedValue([]);
+    userModel.findById.mockResolvedValue(mockUsers[2]);
 
-  //   const res = await service.match(mockUsers[2]._id);
-  //   expect(res).toEqual({ message: 'No pets found.' });
-  // });
+    const res = await service.match(mockUsers[2]._id);
+    expect(res).toEqual({ message: 'No pets found.' });
+  });
 
-  // it('should return message if user not found', async () => {
-  //   jest.spyOn(model, 'find').mockResolvedValue(mockPet);
-  //   userModel.findById.mockResolvedValue(null);
+  it('should return message if user not found', async () => {
+    petModel.find.mockResolvedValue(mockPet);
+    userModel.findById.mockReturnValue({
+      populate: jest.fn().mockResolvedValue(null),
+    } as any);
 
-  //   const res = await service.match(mockUsers[2]._id);
-  //   expect(res).toEqual({ message: 'User not found.' });
-  // });
+    const res = await service.match(mockUsers[2]._id);
+    expect(res).toEqual({ message: 'User not found.' });
+  });
 });
