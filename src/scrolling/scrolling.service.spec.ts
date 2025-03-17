@@ -14,7 +14,6 @@ import {
   AnimalTrait,
   AnimalTraitDocument,
 } from '../traits/schemas/animalTrait.schema';
-import { populate } from 'dotenv';
 
 const mockPet = [
   {
@@ -142,15 +141,6 @@ const mockAnimalTraits = [
     priority: 4,
   },
 ];
-
-const mockPetModel = {
-  findOne: jest.fn().mockImplementation(() => ({
-    exec: jest.fn().mockResolvedValue(null),
-  })),
-  find: jest.fn().mockImplementation(() => ({
-    exec: jest.fn().mockResolvedValue([]),
-  })),
-};
 
 describe('ScrollingService', () => {
   let service: ScrollingService;
