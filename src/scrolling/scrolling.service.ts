@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import mongoose, { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { Pet } from './schema/pet.schema';
 import { matchUserWithAnimals } from '../utils/matchUserWithAnimals';
@@ -26,10 +26,10 @@ export class ScrollingService {
   ) {}
 
   async getPetbyIndex(id: string): Promise<Pet | { error: string }> {
-    const index = parseInt(id);
-    if (isNaN(index) || index < 0) {
+    if (!mongoose.isValidObjectId(id)) {
       return { error: 'Index is Invalid.' };
     }
+    const index = new ObjectId(id);
     const result = await this.petModel.findOne({ id: index });
     if (!result) {
       return { error: 'Pet not found.' };
@@ -82,14 +82,12 @@ export class ScrollingService {
       return { message: 'No pets found.' };
     }
 
-    const user = await this.userModel.findById(userId);
+    const user = await this.userModel.findById(userId).populate('traits');
     if (!user) {
       return { message: 'User not found.' };
     }
 
-    const userWithTraits = (
-      await this.userModel.findById(userId).populate('traits')
-    ).toObject();
+    const userWithTraits = user.toObject();
 
     const allAnimalsTmp = await this.petModel.find().populate('traits');
 

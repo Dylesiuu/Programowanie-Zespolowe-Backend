@@ -7,8 +7,8 @@ const AutoIncrement = AutoIncrementFactory(mongoose);
 
 @Schema()
 export class Pet extends Document {
-  @Prop({ unique: true })
-  id: number;
+  // @Prop({ unique: true })
+  // id: number;
 
   @Prop({ required: true })
   name: string;
