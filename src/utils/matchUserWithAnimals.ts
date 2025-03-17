@@ -1,9 +1,12 @@
 function calculateScore(userTraits, animalTraits) {
   let score = 0;
+  let addedPoints = 0;
 
   for (const animalTrait of animalTraits) {
     score -= animalTrait.priority;
   }
+
+  const borderValue = Math.abs(score * 0.4);
 
   for (const userTrait of userTraits) {
     for (const animalTraitIndex of userTrait.animalTraits) {
@@ -12,25 +15,35 @@ function calculateScore(userTraits, animalTraits) {
       );
 
       if (matchingAnimalTrait) {
-        score += matchingAnimalTrait.priority;
+        score += matchingAnimalTrait.priority * 2;
+        addedPoints += matchingAnimalTrait.priority;
       }
     }
   }
 
-  return score;
+  const isValid = addedPoints >= borderValue;
+
+  return { score, isValid };
 }
 
 export function matchUserWithAnimals(user, allAnimals) {
   const newAnimalsArray = allAnimals
-    .map((animal) => ({
-      ...animal,
-      score: calculateScore(user.traits, animal.traits),
-    }))
-    .filter((animal) => animal.score >= -15);
+    .map((animal) => {
+      const { score, isValid } = calculateScore(user.traits, animal.traits);
+
+      return {
+        ...animal,
+        score,
+        isValid,
+      };
+    })
+    .filter((animal) => animal.isValid);
 
   const sortedAnimalsArray = newAnimalsArray.sort((a, b) => b.score - a.score);
 
-  const result = sortedAnimalsArray.map(({ score, ...animal }) => animal);
+  const result = sortedAnimalsArray.map(
+    ({ score, isValid, ...animal }) => animal,
+  );
 
   return result;
 }
