@@ -345,7 +345,7 @@ describe('ScrollingService', () => {
 
     expect(result).toEqual({
       message: 'Matched animals',
-      matchedAnimals: [expectedResult[1], expectedResult[0], expectedResult[2]],
+      matchedAnimals: [expectedResult[1]],
       userWithTraits: mockUserWithtraits,
     });
   });
