@@ -6,9 +6,6 @@ export type UserTraitDocument = UserTrait & Document;
 @Schema()
 export class UserTrait {
   @Prop({ required: true })
-  tagId: number;
-
-  @Prop({ required: true })
   name: string;
 
   @Prop({
