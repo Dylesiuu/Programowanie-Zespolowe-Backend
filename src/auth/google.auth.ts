@@ -8,7 +8,7 @@ import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User } from './schemas/user.schema';
+import { User } from '../user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
 
 @Injectable()

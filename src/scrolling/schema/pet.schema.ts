@@ -7,9 +7,6 @@ const AutoIncrement = AutoIncrementFactory(mongoose);
 
 @Schema()
 export class Pet extends Document {
-  // @Prop({ unique: true })
-  // id: number;
-
   @Prop({ required: true })
   name: string;
 
@@ -37,4 +34,3 @@ export class Pet extends Document {
   image: string;
 }
 export const PetSchema = SchemaFactory.createForClass(Pet);
-PetSchema.plugin(AutoIncrement, { inc_field: 'id', start_seq: 0 });
