@@ -43,7 +43,7 @@ export class ScrollingService {
 
   async getPetbyName(name: string): Promise<Pet[] | { error: string }> {
     if (!name || typeof name !== 'string') {
-      return { error: 'Invalid name input.' };
+      return { error: 'Invalid input.' };
     }
 
     if (!/^[a-zA-Z0-9\s]+$/.test(name)) {
@@ -62,7 +62,7 @@ export class ScrollingService {
       });
 
       if (matchingPets.length === 0) {
-        return { error: 'Pet with that name not found.' };
+        return { error: 'Pet not found.' };
       }
 
       return matchingPets;
