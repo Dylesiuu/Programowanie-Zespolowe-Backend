@@ -211,7 +211,7 @@ describe('ScrollingService', () => {
   it('return error cause name not found', async () => {
     jest.spyOn(petModel, 'find').mockResolvedValue([]);
     const result = await service.getPetbyName('5321');
-    expect(result).toEqual({ error: 'Pet with that name not found.' });
+    expect(result).toEqual({ error: 'Pet not found.' });
   });
 
   //test 8: wiecej niz jeden pet z takim imieniem

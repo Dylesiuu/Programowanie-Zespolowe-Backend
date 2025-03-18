@@ -56,12 +56,27 @@ export class ScrollingController {
   @ApiResponse({
     status: 400,
     description: 'Invalid input.',
-    schema: {
-      type: 'object',
-      properties: {
-        error: {
-          type: 'string',
-          example: 'Invalid input.',
+    content: {
+      'application/json': {
+        examples: {
+          nameTooLong: {
+            summary: 'Name is too long.',
+            value: {
+              error: 'Name is too long.',
+            },
+          },
+          incorrectName: {
+            summary: 'Incorrect name',
+            value: {
+              error: 'Name can only contain letters, numbers, and spaces.',
+            },
+          },
+          invalidName: {
+            summary: 'Invalid input.',
+            value: {
+              error: 'Invalid input.',
+            },
+          },
         },
       },
     },
