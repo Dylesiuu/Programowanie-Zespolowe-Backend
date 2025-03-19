@@ -37,13 +37,6 @@ export class Pet extends Document {
   gender: string;
 
   @ApiProperty({
-    example: 'Toruń',
-    description: 'The location of the pet',
-  })
-  @Prop({ required: true })
-  location: string;
-
-  @ApiProperty({
     example: 'Schronisko dla zwierząt w Toruniu',
     description: 'The shelter where the animal is',
   })
