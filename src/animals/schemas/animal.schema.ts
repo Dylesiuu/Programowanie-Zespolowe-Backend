@@ -1,5 +1,5 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
-import { Document } from 'mongoose';
+import { Document, ObjectId, Schema as MongoSchema } from 'mongoose';
 
 export type AnimalDocument = Animal & Document;
 
@@ -20,17 +20,18 @@ export class Animal {
   @Prop({ required: true })
   gender: string;
 
+  //0 -> dog, 1 -> cat
   @Prop({ required: true })
-  location: string;
+  type: boolean;
 
-  @Prop({ required: true })
-  shelter: string;
+  @Prop({ type: MongoSchema.Types.ObjectId, required: true })
+  shelter: ObjectId;
+
+  @Prop({ type: [MongoSchema.Types.ObjectId], required: true })
+  traits: ObjectId[];
 
   @Prop({ type: [String], required: true })
-  traits: string[];
-
-  @Prop({ required: true })
-  image: string;
+  images: string[];
 }
 
 export const AnimalSchema = SchemaFactory.createForClass(Animal);
