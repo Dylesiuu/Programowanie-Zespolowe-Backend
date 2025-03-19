@@ -6,23 +6,23 @@ import { CreateAnimalDto } from './dto/create-animal.dto';
 export class AnimalsController {
   constructor(private readonly animalService: AnimalsService) {}
 
-  @Post('')
+  @Post()
   async create(@Body() createAnimalDto: CreateAnimalDto) {
-    return await this.animalService.create(createAnimalDto);
+    return this.animalService.create(createAnimalDto);
   }
 
-  @Get('')
+  @Get()
   async findAll() {
-    return await this.animalService.findAll();
+    return this.animalService.findAll();
   }
 
   @Get(':id')
   async findOne(@Param('id') id: string) {
-    return await this.animalService.findOne(id);
+    return this.animalService.findOne(id);
   }
 
   @Delete(':id')
   async remove(@Param('id') id: string) {
-    return await this.animalService.remove(id);
+    return this.animalService.remove(id);
   }
 }
