@@ -4,6 +4,8 @@ import {
   IsArray,
   IsUrl,
   IsInt,
+  IsBoolean,
+  IsMongoId,
   Min,
   Max,
 } from 'class-validator';
@@ -31,19 +33,21 @@ export class CreateAnimalDto {
   @IsNotEmpty()
   gender: string;
 
-  @IsString()
+  @IsBoolean()
   @IsNotEmpty()
-  location: string;
+  type: boolean;
 
-  @IsString()
+  @IsMongoId()
   @IsNotEmpty()
   shelter: string;
 
   @IsArray()
+  @IsMongoId({ each: true })
   @IsNotEmpty()
   traits: string[];
 
-  @IsUrl()
+  @IsArray()
+  @IsUrl({}, { each: true })
   @IsNotEmpty()
-  image: string;
+  images: string[];
 }
