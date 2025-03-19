@@ -30,7 +30,7 @@ export class ScrollingService {
       return { error: 'Index is Invalid.' };
     }
     const index = new ObjectId(id);
-    const result = await this.petModel.findOne({ id: index });
+    const result = await this.petModel.findOne({ _id: index });
     if (!result) {
       return { error: 'Pet not found.' };
     }

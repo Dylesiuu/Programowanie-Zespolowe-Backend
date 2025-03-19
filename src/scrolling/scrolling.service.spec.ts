@@ -183,7 +183,7 @@ describe('ScrollingService', () => {
 
     const result = await service.getPetbyIndex(mockPet[1]._id.toString());
     expect(result).toEqual(mockPet[1]);
-    expect(petModel.findOne).toHaveBeenCalledWith({ id: mockPet[1]._id });
+    expect(petModel.findOne).toHaveBeenCalledWith({ _id: mockPet[1]._id });
   });
 
   it('return rerror for index not in table', async () => {
