@@ -2,7 +2,7 @@ import { Body, Controller, Get, Param, Post } from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Pet } from './schema/pet.schema';
 
 @ApiTags('ScrollingController')
@@ -266,10 +266,22 @@ export class ScrollingController {
       },
     },
   })
+  @ApiBody({
+    schema: {
+      type: 'object',
+      properties: {
+        userId: { type: 'string', example: '60c72b2f9b1d8e4a5f6e7d8c' },
+        lng: { type: 'number', example: 18.123456 },
+        lat: { type: 'number', example: 54.123456 },
+        range: { type: 'number', example: 100 },
+      },
+    },
+  })
   async match(
     @Body('userId') userId: string,
     @Body('lng') lng: number,
     @Body('lat') lat: number,
+    @Body('range') range: number,
   ) {
     const result = this.scrollingService.match(new ObjectId(userId));
 
