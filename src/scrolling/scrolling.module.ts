@@ -11,6 +11,7 @@ import {
   AnimalTraitSchema,
 } from 'src/traits/schemas/animalTrait.schema';
 import { UserTrait, UserTraitSchema } from '../traits/schemas/userTrait.schema';
+import { Shelter, ShelterSchema } from 'src/shelters/schemas/shelter.schema';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { UserTrait, UserTraitSchema } from '../traits/schemas/userTrait.schema';
       { name: User.name, schema: UserSchema },
       { name: UserTrait.name, schema: UserTraitSchema },
       { name: AnimalTrait.name, schema: AnimalTraitSchema },
+      { name: Shelter.name, schema: ShelterSchema },
     ]),
     JwtModule.registerAsync({
       imports: [ConfigModule],

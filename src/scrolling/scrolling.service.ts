@@ -24,7 +24,8 @@ export class ScrollingService {
     private readonly userTraitModel: Model<UserTraitDocument>,
     @InjectModel(AnimalTrait.name)
     private readonly animalTraitModel: Model<AnimalTraitDocument>,
-    @InjectModel(Shelter.name) private readonly shelterModel: Model<ShelterDocument>,
+    @InjectModel(Shelter.name)
+    private readonly shelterModel: Model<ShelterDocument>,
   ) {}
 
   async getPetbyIndex(id: string): Promise<Pet | { error: string }> {
@@ -77,7 +78,7 @@ export class ScrollingService {
     userId: ObjectId,
     lat: number,
     lng: number,
-    radius: number,
+    range: number,
   ): Promise<
     | { message: string; matchedAnimals: any[]; userWithTraits: any }
     | { message: string }
@@ -85,10 +86,12 @@ export class ScrollingService {
     let shelters = await this.shelterModel.find({
       location: {
         $geoWithin: {
-          $centerSphere: [[lat, lng], radius / 6371000],
+          $centerSphere: [[lat, lng], range / 6371000],
         },
       },
     });
+
+    console.log('test');
 
     const allAnimals = await this.petModel.find({
       shelter: { $in: shelters.map((shelter) => shelter._id) },
