@@ -37,18 +37,11 @@ export class Pet extends Document {
   gender: string;
 
   @ApiProperty({
-    example: 'Toruń',
-    description: 'The location of the pet',
+    example: '64d5a9e8f1b2c24d55b7e3f2',
+    description: 'Id of the shelter where the animal is located',
   })
-  @Prop({ required: true })
-  location: string;
-
-  @ApiProperty({
-    example: 'Schronisko dla zwierząt w Toruniu',
-    description: 'The shelter where the animal is',
-  })
-  @Prop({ required: true })
-  shelter: string;
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Pet' }] })
+  shelter: MongooseSchema.Types.ObjectId;
 
   @ApiProperty({
     example: ['64d5a9e8f1b2c24d55a9e8f1'],

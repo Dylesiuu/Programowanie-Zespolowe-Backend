@@ -14,6 +14,7 @@ import {
   AnimalTrait,
   AnimalTraitDocument,
 } from '../traits/schemas/animalTrait.schema';
+import { Shelter, ShelterDocument } from '../shelters/schemas/shelter.schema';
 
 const mockPet = [
   {
@@ -148,6 +149,7 @@ describe('ScrollingService', () => {
   const userModel = mock<Model<UserDocument>>();
   const userTraitModel = mock<Model<UserTraitDocument>>();
   const animalTraitModel = mock<Model<AnimalTraitDocument>>();
+  const shelterModel = mock<Model<ShelterDocument>>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -163,6 +165,7 @@ describe('ScrollingService', () => {
           provide: getModelToken(AnimalTrait.name),
           useValue: animalTraitModel,
         },
+        { provide: getModelToken(Shelter.name), useValue: shelterModel },
       ],
     }).compile();
 
@@ -235,10 +238,28 @@ describe('ScrollingService', () => {
       name: 'Piotr',
       lastname: 'Wiśniewski',
       email: 'piotr.wisniewski@example.com',
-      password: 'mypassword789',
+      password: '$2b$12$gio35jsogsDCsopFUrvYcOm8HEcedZ9aWqYpJnmuj.qWvEOFwzB0m',
       favourites: [0, 1, 2],
       traits: [mockUserTraits[1], mockUserTraits[2]],
     };
+
+    const mockShleters = [
+      {
+        _id: new ObjectId('60a1b2c3d4e5f6a7b8c9d0e1'),
+        location: [52.2297, 21.0122],
+        animals: [
+          '48a1b2c3d4e5f6a7b8c9d0e2', //(Spongebob)
+          '72f1a2b3c4d5e6f7a8b9c0d3', //(Pomelo)
+        ],
+      },
+      {
+        _id: new ObjectId('70f1a2b3c4d5e6f7a8b9c0d2'),
+        location: [53.0138, 18.5984],
+        animals: [
+          '63e4d5a7f1a2b3c4d5e6f7b9', //(Spongebob z Bydgoszczy)
+        ],
+      },
+    ];
 
     const mockAnimalWithTraits = [
       {
@@ -247,8 +268,7 @@ describe('ScrollingService', () => {
         age: '1 rok',
         discribtion: 'pochodzi z warszawy',
         gender: 'Pies',
-        location: 'Warszawa',
-        shelter: 'Schronisko na Paluchu',
+        shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
         traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
         image:
           'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
@@ -258,8 +278,7 @@ describe('ScrollingService', () => {
           age: '1 rok',
           discribtion: 'pochodzi z warszawy',
           gender: 'Pies',
-          location: 'Warszawa',
-          shelter: 'Schronisko na Paluchu',
+          shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
           traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
           image:
             'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
@@ -271,8 +290,7 @@ describe('ScrollingService', () => {
         age: '2 lata',
         discribtion: 'pochodzi z torunia',
         gender: 'Suka',
-        location: 'Toruń',
-        shelter: 'Schronisko dla zwierząt w Toruniu',
+        shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
         traits: [mockAnimalTraits[2]],
         image:
           'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
@@ -282,8 +300,7 @@ describe('ScrollingService', () => {
           age: '2 lata',
           discribtion: 'pochodzi z torunia',
           gender: 'Suka',
-          location: 'Toruń',
-          shelter: 'Schronisko dla zwierząt w Toruniu',
+          shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
           traits: [mockAnimalTraits[2]],
           image:
             'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
@@ -295,8 +312,7 @@ describe('ScrollingService', () => {
         age: '4 lata',
         discribtion: 'pochodzi z bydgoszczy',
         gender: 'Pies',
-        location: 'Bydgoszcz',
-        shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
+        shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
         traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
         image:
           'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
@@ -306,8 +322,7 @@ describe('ScrollingService', () => {
           age: '4 lata',
           discribtion: 'pochodzi z bydgoszczy',
           gender: 'Pies',
-          location: 'Bydgoszcz',
-          shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
+          shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
           traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
           image:
             'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
@@ -324,14 +339,19 @@ describe('ScrollingService', () => {
     petModel.find.mockReturnValue({
       populate: jest.fn().mockResolvedValue(mockAnimalWithTraits),
     } as any);
+    shelterModel.find.mockResolvedValue([mockShleters[0]]);
 
-    const result = await service.match(mockUsers[2]._id);
+    const result = await service.match(
+      mockUsers[2]._id,
+      52.2297,
+      21.0122,
+      1000,
+    );
 
     const expectedResult = mockAnimalWithTraits.map((animal) => {
       const { toObject, ...rest } = animal;
       return rest;
     });
-    console.log(expectedResult);
 
     expect(result).toEqual({
       message: 'Matched animals',
@@ -341,20 +361,39 @@ describe('ScrollingService', () => {
   });
 
   it('shuld return message if no pets found', async () => {
+    shelterModel.find.mockResolvedValue([]);
     petModel.find.mockResolvedValue([]);
     userModel.findById.mockResolvedValue(mockUsers[2]);
 
-    const res = await service.match(mockUsers[2]._id);
+    const res = await service.match(mockUsers[2]._id, 52.2297, 21.0122, 1000);
     expect(res).toEqual({ message: 'No pets found.' });
   });
 
   it('should return message if user not found', async () => {
+    const mockShleters = [
+      {
+        _id: new ObjectId('60a1b2c3d4e5f6a7b8c9d0e1'),
+        location: [52.2297, 21.0122],
+        animals: [
+          '48a1b2c3d4e5f6a7b8c9d0e2', //(Spongebob)
+          '72f1a2b3c4d5e6f7a8b9c0d3', //(Pomelo)
+        ],
+      },
+      {
+        _id: new ObjectId('70f1a2b3c4d5e6f7a8b9c0d2'),
+        location: [53.0138, 18.5984],
+        animals: [
+          '63e4d5a7f1a2b3c4d5e6f7b9', //(Spongebob z Bydgoszczy)
+        ],
+      },
+    ];
+    shelterModel.find.mockResolvedValue(mockShleters);
     petModel.find.mockResolvedValue(mockPet);
     userModel.findById.mockReturnValue({
       populate: jest.fn().mockResolvedValue(null),
     } as any);
 
-    const res = await service.match(mockUsers[2]._id);
+    const res = await service.match(mockUsers[2]._id, 52.2297, 21.0122, 1000);
     expect(res).toEqual({ message: 'User not found.' });
   });
 });
