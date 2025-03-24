@@ -13,16 +13,18 @@ import {
   AnimalTrait,
   AnimalTraitDocument,
 } from '../traits/schemas/animalTrait.schema';
+import { Shelter, ShelterDocument } from '../shelters/schemas/shelter.schema';
 
 @Injectable()
 export class ScrollingService {
   constructor(
     @InjectModel(Pet.name) private readonly petModel: Model<Pet>,
-    @InjectModel(User.name) private userModel: Model<UserDocument>,
+    @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(UserTrait.name)
     private readonly userTraitModel: Model<UserTraitDocument>,
     @InjectModel(AnimalTrait.name)
     private readonly animalTraitModel: Model<AnimalTraitDocument>,
+    @InjectModel(Shelter.name) private readonly shelterModel: Model<ShelterDocument>,
   ) {}
 
   async getPetbyIndex(id: string): Promise<Pet | { error: string }> {
@@ -73,11 +75,27 @@ export class ScrollingService {
 
   async match(
     userId: ObjectId,
+    lat: number,
+    lng: number,
+    radius: number,
   ): Promise<
     | { message: string; matchedAnimals: any[]; userWithTraits: any }
     | { message: string }
   > {
-    const allAnimals = await this.getAll();
+    let shelters = await this.shelterModel.find({
+      location: {
+        $geoWithin: {
+          $centerSphere: [[lat, lng], radius / 6371000],
+        },
+      },
+    });
+
+    const allAnimals = await this.petModel.find({
+      shelter: { $in: shelters.map((shelter) => shelter._id) },
+    });
+
+    shelters = null;
+
     if (allAnimals.length === 0) {
       return { message: 'No pets found.' };
     }
@@ -96,6 +114,10 @@ export class ScrollingService {
     );
 
     const result = matchUserWithAnimals(userWithTraits, allAnimalsWithTraits);
+
+    if (result.length === 0) {
+      return { message: 'No pets found.' };
+    }
 
     return {
       message: 'Matched animals',

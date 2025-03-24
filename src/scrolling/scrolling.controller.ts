@@ -177,8 +177,7 @@ export class ScrollingController {
               age: '1 rok',
               discribtion: 'pochodzi z warszawy',
               gender: 'Pies',
-              location: 'Warszawa',
-              shelter: 'Schronisko na Paluchu',
+              shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
               traits: [
                 {
                   _id: new ObjectId('507f1f77bcf86cd799439011'),
@@ -200,8 +199,7 @@ export class ScrollingController {
               age: '2 lata',
               discribtion: 'pochodzi z torunia',
               gender: 'Suka',
-              location: 'Toruń',
-              shelter: 'Schronisko dla zwierząt w Toruniu',
+              shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
               traits: [
                 {
                   _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8'),
@@ -221,7 +219,8 @@ export class ScrollingController {
             name: 'Piotr',
             lastname: 'Wiśniewski',
             email: 'piotr.wisniewski@example.com',
-            password: 'mypassword789',
+            password:
+              '$2b$12$gio35jsogsDCsopFUrvYcOm8HEcedZ9aWqYpJnmuj.qWvEOFwzB0m',
             favourites: [0, 1, 2],
             traits: [
               {
@@ -283,7 +282,21 @@ export class ScrollingController {
     @Body('lat') lat: number,
     @Body('range') range: number,
   ) {
-    const result = this.scrollingService.match(new ObjectId(userId));
+    if (!mongoose.isValidObjectId(userId)) {
+      throw new Error('Invalid input.');
+    }
+    if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
+      throw new Error('Invalid input.');
+    }
+    if (range < 0) {
+      throw new Error('Invalid input.');
+    }
+    const result = this.scrollingService.match(
+      new ObjectId(userId),
+      lat,
+      lng,
+      range,
+    );
 
     if (result.message === 'User not found.') {
       throw new Error('User not found.');
