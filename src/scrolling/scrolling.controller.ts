@@ -265,6 +265,19 @@ export class ScrollingController {
       },
     },
   })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: {
+          type: 'string',
+          example: 'Invalid input.',
+        },
+      },
+    },
+  })
   @ApiBody({
     schema: {
       type: 'object',
@@ -282,14 +295,20 @@ export class ScrollingController {
     @Body('lat') lat: number,
     @Body('range') range: number,
   ) {
+
+    if (isNaN(lat) || isNaN(lng) || isNaN(range)) {
+      // throw new Error('Invalid input.');
+      return { message: 'Invalid input.' };
+    }
+
     if (!mongoose.isValidObjectId(userId)) {
-      throw new Error('Invalid input.');
+      return { message: 'Invalid input.' };
     }
     if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
-      throw new Error('Invalid input.');
+      return { message: 'Invalid input.' };
     }
-    if (range < 0) {
-      throw new Error('Invalid input.');
+    if (range <= 0) {
+      return { message: 'Invalid input.' };
     }
     const result = this.scrollingService.match(
       new ObjectId(userId),
@@ -299,7 +318,7 @@ export class ScrollingController {
     );
 
     if (result.message === 'User not found.') {
-      throw new Error('User not found.');
+      return { message: 'User not found.' };
     }
 
     if (result.message === 'No pets found.') {
