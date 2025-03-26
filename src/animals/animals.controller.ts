@@ -12,15 +12,15 @@ import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
-//import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
-//@ApiTags('Animals')
+@ApiTags('Animals')
 @Controller('animals')
 export class AnimalsController {
   constructor(private readonly animalService: AnimalsService) {}
 
   @Post()
-  /*@ApiOperation({
+  @ApiOperation({
     summary: 'Add new animal to the database',
     description:
         'This endpoint allows you to create a new animal in the database. ' +
@@ -51,6 +51,7 @@ export class AnimalsController {
     },
   })
   @ApiResponse({
+    status: 400,
     description: 'Bad request. Missing or invalid fields.',
     schema: {
       type: 'object',
@@ -63,13 +64,13 @@ export class AnimalsController {
         statusCode: { type: 'number', example: 400 },
       },
     },
-  })*/
+  })
   async create(@Body() createAnimalDto: CreateAnimalDto) {
     return this.animalService.create(createAnimalDto);
   }
 
   @Get()
-  /*@ApiOperation({
+  @ApiOperation({
     summary: 'Get all animals from the database',
     description:
         'This endpoint returns an array of all animals in the database. ' +
@@ -126,13 +127,13 @@ export class AnimalsController {
       },
     },
     example: [],
-  })*/
+  })
   async findAll() {
     return this.animalService.findAll();
   }
 
   @Get(':id')
-  /*@ApiOperation({
+  @ApiOperation({
     summary: 'Get an animal by ID from the database',
     description:
       'This endpoint retrieves a specific animal from the database using its ID. ' +
@@ -160,6 +161,7 @@ export class AnimalsController {
     },
   })
   @ApiResponse({
+    status: 400,
     description: 'Invalid ObjectId format.',
     schema: {
       type: 'object',
@@ -174,6 +176,7 @@ export class AnimalsController {
     },
   })
   @ApiResponse({
+    status: 404,
     description: 'Animal not found.',
     schema: {
       type: 'object',
@@ -186,7 +189,7 @@ export class AnimalsController {
         statusCode: { type: 'number', example: 404 },
       },
     },
-  })*/
+  })
   async findOne(@Param('id') id: string) {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException('Invalid ObjectId format.');
@@ -200,7 +203,7 @@ export class AnimalsController {
   }
 
   @Delete(':id')
-  /*@ApiOperation({
+  @ApiOperation({
     summary: 'Delete an animal by ID',
     description:
         'This endpoint allows you to delete an animal by its ID from the database. ',
@@ -211,6 +214,7 @@ export class AnimalsController {
     example: { message: 'Animal deleted successfully' },
   })
   @ApiResponse({
+    status: 400,
     description: 'Invalid ObjectId format.',
     schema: {
       type: 'object',
@@ -225,6 +229,7 @@ export class AnimalsController {
     },
   })
   @ApiResponse({
+    status: 404,
     description: 'Animal not found.',
     schema: {
       type: 'object',
@@ -237,7 +242,7 @@ export class AnimalsController {
         statusCode: { type: 'number', example: 404 },
       },
     },
-  })*/
+  })
   async remove(@Param('id') id: string) {
     if (!mongoose.isValidObjectId(id)) {
       throw new BadRequestException('Invalid ObjectId format.');
