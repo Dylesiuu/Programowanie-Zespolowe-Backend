@@ -1,4 +1,11 @@
-import { Body, Controller, Get, Param, Post } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Get,
+  NotFoundException,
+  Param,
+  Post,
+} from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
@@ -32,18 +39,26 @@ export class ScrollingController {
   @ApiResponse({
     status: 200,
     description: 'Pet found.',
-    type: Pet,
-    example: {
-      _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
-      name: 'Pomelo',
-      age: '2 lata',
-      discribtion: 'pochodzi z torunia',
-      gender: 'Suka',
-      location: 'Toruń',
-      shelter: 'Schronisko dla zwierząt w Toruniu',
-      traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
-      image:
-        'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+    schema: {
+      type: 'object',
+      properties: {
+        result: {
+          type: 'Pet',
+          example: {
+            _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
+            name: 'Pomelo',
+            age: '2 lata',
+            discribtion: 'pochodzi z torunia',
+            gender: 'Suka',
+            location: 'Toruń',
+            shelter: 'Schronisko dla zwierząt w Toruniu',
+            traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
+            image:
+              'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+          },
+        },
+        statusCode: { type: 'number', example: 200 },
+      },
     },
   })
   @ApiResponse({
@@ -52,10 +67,12 @@ export class ScrollingController {
     schema: {
       type: 'object',
       properties: {
+        message: { type: 'string', example: 'Pet not found.' },
         error: {
           type: 'string',
-          example: 'Pet not found.',
+          example: 'Not Found',
         },
+        statusCode: { type: 'number', example: 404 },
       },
     },
   })
@@ -68,50 +85,49 @@ export class ScrollingController {
           nameTooLong: {
             summary: 'Name is too long.',
             value: {
-              error: 'Name is too long.',
+              message: 'Name is too long.',
+              statusCode: 400,
             },
           },
           incorrectName: {
             summary: 'Incorrect name',
             value: {
-              error: 'Name can only contain letters, numbers, and spaces.',
+              message: 'Name can only contain letters, numbers, and spaces.',
+              statusCode: 400,
             },
           },
           invalidName: {
             summary: 'Invalid input.',
             value: {
-              error: 'Invalid input.',
+              message: 'Invalid input.',
+              statusCode: 400,
             },
           },
         },
       },
     },
   })
-  @ApiResponse({
-    status: 403,
-    description: 'Uer does not have the required role.',
-    schema: {
-      type: 'object',
-      properties: { message: { type: 'string', example: 'Forbidden.' } },
-    },
-  })
-  @ApiResponse({
-    status: 401,
-    description: 'User is not authorized.',
-    schema: {
-      type: 'object',
-      properties: { message: { type: 'string', example: 'Unauthorized.' } },
-    },
-  })
-  getData(@Param('arg') arg: string) {
+  async getData(@Param('arg') arg: string) {
     const isObjectId = (value: string): boolean => {
       return mongoose.isValidObjectId(value);
     };
+
+    let result;
     if (isObjectId(arg)) {
-      return this.scrollingService.getPetbyIndex(arg);
+      result = await this.scrollingService.getPetbyIndex(arg);
     } else {
-      return this.scrollingService.getPetbyName(arg);
+      result = await this.scrollingService.getPetbyName(arg);
     }
+
+    if (result.message === 'Pet not found.') {
+      throw new NotFoundException('Pet not found.');
+    }
+
+    if ('message' in result) {
+      return { message: result.message, statusCode: 400 };
+    }
+
+    return { result, statusCode: 200 };
   }
 
   @Roles(UserRole.ADMIN)
@@ -127,50 +143,69 @@ export class ScrollingController {
   @ApiResponse({
     status: 200,
     description: 'Pets found.',
-    type: [Pet],
-    example: [
-      {
-        _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
-        name: 'Pomelo',
-        age: '2 lata',
-        discribtion: 'pochodzi z torunia',
-        gender: 'Suka',
-        location: 'Toruń',
-        shelter: 'Schronisko dla zwierząt w Toruniu',
-        traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
-        image:
-          'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+    schema: {
+      properties: {
+        Pets: {
+          type: 'array',
+          items: {
+            type: 'object',
+          },
+          example: [
+            {
+              _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
+              name: 'Pomelo',
+              age: '2 lata',
+              discribtion: 'pochodzi z torunia',
+              gender: 'Suka',
+              location: 'Toruń',
+              shelter: 'Schronisko dla zwierząt w Toruniu',
+              traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
+              image:
+                'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+            },
+            {
+              _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
+              name: 'Spongebob',
+              age: '4 lata',
+              discribtion: 'pochodzi z bydgoszczy',
+              gender: 'Pies',
+              location: 'Bydgoszcz',
+              shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
+              traits: [
+                new ObjectId('507f1f77bcf86cd799439011'),
+                new ObjectId('4e4d5a7f1a2b3c4d5e6f7a89'),
+              ],
+              image:
+                'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
+            },
+          ],
+        },
+        statusCode: { type: 'number', example: 200 },
       },
-      {
-        _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
-        name: 'Spongebob',
-        age: '4 lata',
-        discribtion: 'pochodzi z bydgoszczy',
-        gender: 'Pies',
-        location: 'Bydgoszcz',
-        shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
-        traits: [
-          new ObjectId('507f1f77bcf86cd799439011'),
-          new ObjectId('4e4d5a7f1a2b3c4d5e6f7a89'),
-        ],
-        image:
-          'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
-      },
-    ],
+    },
   })
   @ApiResponse({
     status: 404,
     description: 'No pets found.',
     schema: {
-      type: 'array',
-      items: {
-        type: 'object',
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'No pets found.' },
+        error: {
+          type: 'string',
+          example: 'No pets found.',
+        },
+        statusCode: { type: 'number', example: 404 },
       },
     },
-    example: [],
   })
-  gatAllPet() {
-    return this.scrollingService.getAll();
+  async gatAllPet() {
+    const res = await this.scrollingService.getAll();
+
+    if (res.message === 'No pets found.') {
+      throw new NotFoundException('No pets found.');
+    }
+    return { Pets: res, statusCode: 200 };
   }
 
   @Roles(UserRole.USER)
@@ -266,6 +301,7 @@ export class ScrollingController {
             ],
           },
         },
+        statusCode: { type: 'number', example: 200 },
       },
     },
   })
@@ -278,13 +314,17 @@ export class ScrollingController {
           userNotFound: {
             summary: 'User not found',
             value: {
-              message: 'user not found',
+              message: 'User not found.',
+              error: 'Not Found',
+              statusCode: 404,
             },
           },
           petsNotFound: {
             summary: 'Pets not found',
             value: {
-              message: 'pets not found',
+              message: 'No pets found.',
+              error: 'Not Found',
+              statusCode: 404,
             },
           },
         },
@@ -300,6 +340,10 @@ export class ScrollingController {
         message: {
           type: 'string',
           example: 'Invalid input.',
+        },
+        statusCode: {
+          type: 'number',
+          example: 400,
         },
       },
     },
@@ -321,20 +365,26 @@ export class ScrollingController {
     @Body('lat') lat: number,
     @Body('range') range: number,
   ) {
+    const mes = {
+      message: 'Invalid input',
+      statusCode: 400,
+    };
+
     if (isNaN(lat) || isNaN(lng) || isNaN(range)) {
-      return { message: 'Invalid input.' };
+      return mes;
     }
 
     if (!mongoose.isValidObjectId(userId)) {
-      return { message: 'Invalid input.' };
+      return mes;
     }
     if (lng < -180 || lng > 180 || lat < -90 || lat > 90) {
-      return { message: 'Invalid input.' };
+      return mes;
     }
     if (range <= 0) {
-      return { message: 'Invalid input.' };
+      return mes;
     }
-    const result = this.scrollingService.match(
+
+    const result = await this.scrollingService.match(
       new ObjectId(userId),
       lat,
       lng,
@@ -342,13 +392,15 @@ export class ScrollingController {
     );
 
     if (result.message === 'User not found.') {
-      return { message: 'User not found.' };
+      //return { message: 'User not found.' };
+      throw new NotFoundException('User not found.');
     }
 
     if (result.message === 'No pets found.') {
-      return { message: 'No pets found.' };
+      //return { message: 'No pets found.' };
+      throw new NotFoundException('No pets found.');
     }
 
-    return result;
+    return { ...result, statusCode: 200 };
   }
 }

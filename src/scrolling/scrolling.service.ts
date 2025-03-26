@@ -28,33 +28,39 @@ export class ScrollingService {
     private readonly shelterModel: Model<ShelterDocument>,
   ) {}
 
-  async getPetbyIndex(id: string): Promise<Pet | { error: string }> {
+  async getPetbyIndex(id: string): Promise<Pet | { message: string }> {
     if (!mongoose.isValidObjectId(id)) {
-      return { error: 'Index is Invalid.' };
+      return { message: 'Index is Invalid.' };
     }
     const index = new ObjectId(id);
     const result = await this.petModel.findOne({ _id: index });
     if (!result) {
-      return { error: 'Pet not found.' };
+      return { message: 'Pet not found.' };
     }
     return result;
   }
 
-  async getAll(): Promise<Pet[]> {
-    return this.petModel.find();
+  async getAll(): Promise<Pet[] | { message: string }> {
+    const result = await this.petModel.find();
+
+    if (result.length === 0) {
+      return { message: 'No pets found.' };
+    }
+
+    return result;
   }
 
-  async getPetbyName(name: string): Promise<Pet[] | { error: string }> {
+  async getPetbyName(name: string): Promise<Pet[] | { message: string }> {
     if (!name || typeof name !== 'string') {
-      return { error: 'Invalid input.' };
+      return { message: 'Invalid input.' };
     }
 
     if (!/^[a-zA-Z0-9\s]+$/.test(name)) {
-      return { error: 'Name can only contain letters, numbers, and spaces.' };
+      return { message: 'Name can only contain letters, numbers, and spaces.' };
     }
 
     if (name.length > 50) {
-      return { error: 'Name is too long.' };
+      return { message: 'Name is too long.' };
     }
 
     const sanitizedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -65,12 +71,12 @@ export class ScrollingService {
       });
 
       if (matchingPets.length === 0) {
-        return { error: 'Pet not found.' };
+        return { message: 'Pet not found.' };
       }
 
       return matchingPets;
     } catch (error) {
-      return { error: 'An error occurred while fetching pets.' };
+      return { message: 'An message occurred while fetching pets.' };
     }
   }
 
