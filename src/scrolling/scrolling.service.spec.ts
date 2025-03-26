@@ -193,13 +193,13 @@ describe('ScrollingService', () => {
     jest.spyOn(petModel, 'findOne').mockReturnValue(null);
 
     const result = await service.getPetbyIndex('507f1f77bcf86cd799439011');
-    expect(result).toEqual({ error: 'Pet not found.' });
+    expect(result).toEqual({ message: 'Pet not found.' });
   });
 
   //test 5: zły indeks(nie liczba)
   it('return error for index not a number', async () => {
     const result = await service.getPetbyIndex('aa');
-    expect(result).toEqual({ error: 'Index is Invalid.' });
+    expect(result).toEqual({ message: 'Index is Invalid.' });
   });
 
   // test 6: zwracanie danych z nazwy
@@ -214,7 +214,7 @@ describe('ScrollingService', () => {
   it('return error cause name not found', async () => {
     jest.spyOn(petModel, 'find').mockResolvedValue([]);
     const result = await service.getPetbyName('5321');
-    expect(result).toEqual({ error: 'Pet not found.' });
+    expect(result).toEqual({ message: 'Pet not found.' });
   });
 
   //test 8: wiecej niz jeden pet z takim imieniem
