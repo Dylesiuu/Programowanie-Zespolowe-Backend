@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { Animal, AnimalDocument } from './schemas/animal.schema';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import { calculateAge } from '../utils/calculateAge';
@@ -17,23 +18,29 @@ export class AnimalsService {
   }
 
   async findAll() {
-    const animals = await this.animalModel.find().exec();
+    const animals = await this.animalModel.find();
     return animals.map((animal) => ({
       ...animal.toObject(),
       age: calculateAge(animal.birthYear, animal.birthMonth),
     }));
   }
 
-  async findOne(id: string) {
-    const animal = await this.animalModel.findById(id).exec();
+  async findOne(id: ObjectId) {
+    const animal = await this.animalModel.findById(id);
+    if (!animal) {
+      return false;
+    }
     return {
       ...animal.toObject(),
       age: calculateAge(animal.birthYear, animal.birthMonth),
     };
   }
 
-  async remove(id: string) {
-    const animal = await this.animalModel.findByIdAndDelete(id).exec();
+  async remove(id: ObjectId) {
+    const animal = await this.animalModel.findByIdAndDelete(id);
+    if (!animal) {
+      return false;
+    }
     return { message: 'Animal deleted successfully' };
   }
 }
