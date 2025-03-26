@@ -4,7 +4,11 @@ import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Pet } from './schema/pet.schema';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/auth/roles/user-role.enum';
+import { ApiRoles } from 'src/decorators/api-roles.decorator';
 
+//@ApiBearerAuth()
 @ApiTags('ScrollingController')
 @Controller('scrolling')
 export class ScrollingController {
@@ -14,7 +18,9 @@ export class ScrollingController {
     this.scrollingService = scrollingService;
   }
 
+  @Roles(UserRole.USER)
   @Get(':arg')
+  @ApiRoles(UserRole.USER)
   @ApiOperation({
     description:
       'This endpoint allows you to retrieve data about a specific pet. ' +
@@ -81,6 +87,22 @@ export class ScrollingController {
       },
     },
   })
+  @ApiResponse({
+    status: 403,
+    description: 'Uer does not have the required role.',
+    schema: {
+      type: 'object',
+      properties: { message: { type: 'string', example: 'Forbidden.' } },
+    },
+  })
+  @ApiResponse({
+    status: 401,
+    description: 'User is not authorized.',
+    schema: {
+      type: 'object',
+      properties: { message: { type: 'string', example: 'Unauthorized.' } },
+    },
+  })
   getData(@Param('arg') arg: string) {
     const isObjectId = (value: string): boolean => {
       return mongoose.isValidObjectId(value);
@@ -92,7 +114,9 @@ export class ScrollingController {
     }
   }
 
+  @Roles(UserRole.ADMIN)
   @Get('')
+  @ApiRoles(UserRole.ADMIN)
   @ApiOperation({
     description:
       'This endpoint allows you to retrieve data about all pets. ' +
@@ -149,7 +173,9 @@ export class ScrollingController {
     return this.scrollingService.getAll();
   }
 
+  @Roles(UserRole.USER)
   @Post('match')
+  @ApiRoles(UserRole.USER)
   @ApiOperation({
     description:
       'This endpoint allows you to match a user with a pet. ' +
@@ -295,9 +321,7 @@ export class ScrollingController {
     @Body('lat') lat: number,
     @Body('range') range: number,
   ) {
-
     if (isNaN(lat) || isNaN(lng) || isNaN(range)) {
-      // throw new Error('Invalid input.');
       return { message: 'Invalid input.' };
     }
 

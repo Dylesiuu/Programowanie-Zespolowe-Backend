@@ -22,14 +22,6 @@ import { Shelter, ShelterSchema } from 'src/shelters/schemas/shelter.schema';
       { name: AnimalTrait.name, schema: AnimalTraitSchema },
       { name: Shelter.name, schema: ShelterSchema },
     ]),
-    JwtModule.registerAsync({
-      imports: [ConfigModule],
-      useFactory: async (configService: ConfigService) => ({
-        secret: configService.get('JWT_SECRET'),
-        signOptions: { expiresIn: '60m' },
-      }),
-      inject: [ConfigService],
-    }),
     ConfigModule,
   ],
   controllers: [ScrollingController],

@@ -10,6 +10,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
 import { JwtService } from '@nestjs/jwt';
+import { UserRole } from './roles/user-role.enum';
 
 @Injectable()
 export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
@@ -38,7 +39,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
       const user = await this.userModel.findOne({ email: emails[0].value });
 
       if (user) {
-        const payload = { email: user.email, sub: user._id };
+        const payload = { email: user.email, sub: user._id, role: user.role };
         const token = this.jwtService.sign(payload);
         done(null, { token, userId: user._id });
       } else {
@@ -47,11 +48,16 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           lastname: name.familyName,
           email: emails[0].value,
           password: 'google-oauth',
+          role: UserRole.USER,
         });
 
         await newUser.save();
 
-        const payload = { email: newUser.email, sub: newUser._id };
+        const payload = {
+          email: newUser.email,
+          sub: newUser._id,
+          role: newUser.role,
+        };
         const token = this.jwtService.sign(payload);
         done(null, { token, userId: newUser._id });
       }

@@ -20,12 +20,15 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Public } from './decorators/public.decorator';
+import { error } from 'console';
 
 @ApiTags('AuthenticationController')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('register')
   @ApiOperation({
     summary: 'Register a new user',
@@ -75,6 +78,7 @@ export class AuthController {
     return res;
   }
 
+  @Public()
   @Post('login')
   @ApiOperation({
     summary: 'Login a user',
@@ -147,6 +151,7 @@ export class AuthController {
     return res;
   }
 
+  @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
@@ -159,6 +164,7 @@ export class AuthController {
   })
   async googleAuth() {}
 
+  @Public()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
