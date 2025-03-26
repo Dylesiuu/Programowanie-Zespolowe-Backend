@@ -180,7 +180,6 @@ describe('ScrollingService', () => {
     expect(service).toBeDefined();
   });
 
-  // test 2: zwracanie danych
   it('should return a pet by id', async () => {
     jest.spyOn(petModel, 'findOne').mockResolvedValue(mockPet[1]);
 
@@ -196,13 +195,11 @@ describe('ScrollingService', () => {
     expect(result).toEqual({ message: 'Pet not found.' });
   });
 
-  //test 5: zły indeks(nie liczba)
   it('return error for index not a number', async () => {
     const result = await service.getPetbyIndex('aa');
     expect(result).toEqual({ message: 'Index is Invalid.' });
   });
 
-  // test 6: zwracanie danych z nazwy
   it('return item from table of name', async () => {
     jest.spyOn(petModel, 'find').mockResolvedValue([mockPet[1]]);
 
@@ -210,21 +207,18 @@ describe('ScrollingService', () => {
     expect(result).toEqual([mockPet[1]]);
   });
 
-  //test 7: zła nazwa
   it('return error cause name not found', async () => {
     jest.spyOn(petModel, 'find').mockResolvedValue([]);
     const result = await service.getPetbyName('5321');
     expect(result).toEqual({ message: 'Pet not found.' });
   });
 
-  //test 8: wiecej niz jeden pet z takim imieniem
   it('return more than one pet by name', async () => {
     jest.spyOn(petModel, 'find').mockResolvedValue([mockPet[0], mockPet[2]]);
     const result = await service.getPetbyName('Spongebob');
     expect(result).toEqual([mockPet[0], mockPet[2]]);
   });
 
-  //test 9: zwracanie całej tablicy funkcją getAll
   it('return table by getAll function', async () => {
     jest.spyOn(petModel, 'find').mockResolvedValue(mockPet);
 
