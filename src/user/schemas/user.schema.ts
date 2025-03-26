@@ -1,5 +1,6 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Document, Schema as MongooseSchema } from 'mongoose';
+import { UserRole } from 'src/auth/roles/user-role.enum';
 
 export type UserDocument = User & Document;
 @Schema()
@@ -18,6 +19,9 @@ export class User {
 
   @Prop({ default: [] })
   favourites: number[];
+
+  @Prop({ default: [] })
+  role: UserRole[];
 
   @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'UserTrait' }] })
   traits: MongooseSchema.Types.ObjectId[];

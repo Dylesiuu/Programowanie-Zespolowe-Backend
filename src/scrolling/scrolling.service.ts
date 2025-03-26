@@ -91,8 +91,6 @@ export class ScrollingService {
       },
     });
 
-    console.log('test');
-
     const allAnimals = await this.petModel.find({
       shelter: { $in: shelters.map((shelter) => shelter._id) },
     });
