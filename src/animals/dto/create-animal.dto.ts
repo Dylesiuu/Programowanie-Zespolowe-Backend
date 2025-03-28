@@ -10,6 +10,7 @@ import {
   Max,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { getYear } from 'date-fns';
 
 export class CreateAnimalDto {
   @ApiProperty({
@@ -30,7 +31,7 @@ export class CreateAnimalDto {
   })
   @IsInt()
   @Min(1990)
-  @Max(2025)
+  @Max(getYear(new Date()))
   birthYear: number;
 
   @ApiProperty({
