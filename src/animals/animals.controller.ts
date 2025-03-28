@@ -12,7 +12,7 @@ import { AnimalsService } from './animals.service';
 import { CreateAnimalDto } from './dto/create-animal.dto';
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 
 @ApiTags('Animals')
 @Controller('animals')
@@ -23,8 +23,8 @@ export class AnimalsController {
   @ApiOperation({
     summary: 'Add new animal to the database',
     description:
-        'This endpoint allows you to create a new animal in the database. ' +
-        'It requires a valid JSON payload containing all required animal attributes.',
+      'This endpoint allows you to create a new animal in the database. ' +
+      'It requires a valid JSON payload containing all required animal attributes.',
   })
   @ApiResponse({
     status: 201,
@@ -39,15 +39,11 @@ export class AnimalsController {
         gender: 'Pies',
         type: false,
         shelter: '60af8845e13b1c002b1a1b45',
-        traits: [
-          '60af8845e13b1c002b1a1b46',
-          '60af8845e13b1c002b1a1b47',
-        ],
+        traits: ['60af8845e13b1c002b1a1b46', '60af8845e13b1c002b1a1b47'],
         images: ['https://example.com/rex.jpg'],
         _id: '60af8845e13b1c002b1a1b45',
         __v: 0,
       },
-
     },
   })
   @ApiResponse({
@@ -65,6 +61,7 @@ export class AnimalsController {
       },
     },
   })
+  @ApiBody({ type: CreateAnimalDto })
   async create(@Body() createAnimalDto: CreateAnimalDto) {
     return this.animalService.create(createAnimalDto);
   }
@@ -73,8 +70,8 @@ export class AnimalsController {
   @ApiOperation({
     summary: 'Get all animals from the database',
     description:
-        'This endpoint returns an array of all animals in the database. ' +
-        'If there are no animals, it returns an empty array.',
+      'This endpoint returns an array of all animals in the database. ' +
+      'If there are no animals, it returns an empty array.',
   })
   @ApiResponse({
     status: 200,
@@ -89,14 +86,10 @@ export class AnimalsController {
         gender: 'Pies',
         type: false,
         shelter: '67e43f57a3e76642c12def68',
-        traits: [
-          '63e4d5a7f1a2b3c4d5e6f7a8'
-        ],
-        images: [
-          'https://example.com/pomelo.jpg'
-        ],
+        traits: ['63e4d5a7f1a2b3c4d5e6f7a8'],
+        images: ['https://example.com/pomelo.jpg'],
         __v: 0,
-        age: '4 years'
+        age: '4 years',
       },
       {
         _id: '63e4d5a7f1a2b3c4d5e6f7b9',
@@ -107,26 +100,12 @@ export class AnimalsController {
         gender: 'Pies',
         type: false,
         shelter: '63e4d5a7f1a2b3c4d5e6f7b4',
-        traits: [
-          '507f1f77bcf86cd799439011',
-          '4e4d5a7f1a2b3c4d5e6f7a89',
-        ],
+        traits: ['507f1f77bcf86cd799439011', '4e4d5a7f1a2b3c4d5e6f7a89'],
         images: ['https://example.com/spongebob.jpg'],
         __v: 0,
-        age: '6 years'
+        age: '6 years',
       },
     ],
-  })
-  @ApiResponse({
-    status: 200,
-    description: 'No animals found.',
-    schema: {
-      type: 'array',
-      items: {
-        type: 'object',
-      },
-    },
-    example: [],
   })
   async findAll() {
     return this.animalService.findAll();
@@ -151,13 +130,10 @@ export class AnimalsController {
       gender: 'Pies',
       type: false,
       shelter: '60af8845e13b1c002b1a1b45',
-      traits: [
-        '60af8845e13b1c002b1a1b46',
-        '60af8845e13b1c002b1a1b47',
-      ],
+      traits: ['60af8845e13b1c002b1a1b46', '60af8845e13b1c002b1a1b47'],
       images: ['https://example.com/rex.jpg'],
       __v: 0,
-      age: '6 years'
+      age: '6 years',
     },
   })
   @ApiResponse({
@@ -206,7 +182,7 @@ export class AnimalsController {
   @ApiOperation({
     summary: 'Delete an animal by ID',
     description:
-        'This endpoint allows you to delete an animal by its ID from the database. ',
+      'This endpoint allows you to delete an animal by its ID from the database. ',
   })
   @ApiResponse({
     status: 200,
