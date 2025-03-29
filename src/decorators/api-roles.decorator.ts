@@ -6,20 +6,9 @@ import {
 } from '@nestjs/swagger';
 
 export const ApiRoles = (...roles: string[]) => {
-  return applyDecorators(
+  const decorators = [
     SetMetadata('roles', roles),
     ApiBearerAuth(),
-    ApiForbiddenResponse({
-      description: `Required roles: **${roles}** or higher`,
-      schema: {
-        type: 'object',
-        properties: {
-          message: { type: 'string', example: 'Lack of required roles' },
-          error: { type: 'string', example: 'Forbidden' },
-          statusCode: { type: 'number', example: 403 },
-        },
-      },
-    }),
     ApiUnauthorizedResponse({
       description: 'User is not authorized.',
       schema: {
@@ -31,5 +20,24 @@ export const ApiRoles = (...roles: string[]) => {
         },
       },
     }),
-  );
+  ];
+
+  // Only add ApiForbiddenResponse if roles are provided
+  if (roles.length > 0) {
+    decorators.push(
+      ApiForbiddenResponse({
+        description: `Required roles: **${roles}** or higher`,
+        schema: {
+          type: 'object',
+          properties: {
+            message: { type: 'string', example: 'Lack of required roles' },
+            error: { type: 'string', example: 'Forbidden' },
+            statusCode: { type: 'number', example: 403 },
+          },
+        },
+      }),
+    );
+  }
+
+  return applyDecorators(...decorators);
 };
