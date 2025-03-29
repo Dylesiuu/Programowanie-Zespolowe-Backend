@@ -13,13 +13,18 @@ import { CreateAnimalDto } from './dto/create-animal.dto';
 import mongoose from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
+import { UserRole } from 'src/auth/roles/user-role.enum';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { ApiRoles } from 'src/decorators/api-roles.decorator';
 
 @ApiTags('Animals')
 @Controller('animals')
 export class AnimalsController {
   constructor(private readonly animalService: AnimalsService) {}
 
+  @Roles(UserRole.EMPLOYEE)
   @Post()
+  @ApiRoles(UserRole.EMPLOYEE)
   @ApiOperation({
     summary: 'Add new animal to the database',
     description:
@@ -66,7 +71,9 @@ export class AnimalsController {
     return this.animalService.create(createAnimalDto);
   }
 
+  @Roles(UserRole.ADMIN)
   @Get()
+  @ApiRoles(UserRole.ADMIN)
   @ApiOperation({
     summary: 'Get all animals from the database',
     description:
@@ -111,7 +118,9 @@ export class AnimalsController {
     return this.animalService.findAll();
   }
 
+  @Roles(UserRole.EMPLOYEE)
   @Get(':id')
+  @ApiRoles(UserRole.EMPLOYEE)
   @ApiOperation({
     summary: 'Get an animal by ID from the database',
     description:
@@ -178,7 +187,9 @@ export class AnimalsController {
     }
   }
 
+  @Roles(UserRole.EMPLOYEE)
   @Delete(':id')
+  @ApiRoles(UserRole.EMPLOYEE)
   @ApiOperation({
     summary: 'Delete an animal by ID',
     description:
