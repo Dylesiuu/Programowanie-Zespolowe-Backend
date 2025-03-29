@@ -10,7 +10,7 @@ export const ApiRoles = (...roles: string[]) => {
     SetMetadata('roles', roles),
     ApiBearerAuth(),
     ApiForbiddenResponse({
-      description: `Required roles: **${roles}** or higher`, //${roles.join(', ')}
+      description: `Required roles: **${roles}** or higher`,
       schema: {
         type: 'object',
         properties: {
