@@ -21,7 +21,6 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Public } from './decorators/public.decorator';
-import { error } from 'console';
 
 @ApiTags('AuthenticationController')
 @Controller('auth')

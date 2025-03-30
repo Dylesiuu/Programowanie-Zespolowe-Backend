@@ -14,6 +14,10 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserService } from './user.service';
 import { User } from '../user/schemas/user.schema';
 import { ObjectId } from 'mongodb';
+import { Roles } from 'src/auth/decorators/roles.decorator';
+import { UserRole } from 'src/auth/roles/user-role.enum';
+import { ApiRoles } from 'src/decorators/api-roles.decorator';
+import { ApiNotFoundResponse, ApiResponse } from '@nestjs/swagger';
 
 @Controller('user')
 export class UserController {
@@ -59,6 +63,7 @@ export class UserController {
     if (!user) {
       throw new NotFoundException('User not found');
     }
+
     return user;
   }
 
@@ -77,6 +82,74 @@ export class UserController {
     } else {
       return { message: 'User not found.' };
     }
+  }
+
+  @Roles(UserRole.ADMIN)
+  @Patch('update-role/:id')
+  @ApiRoles(UserRole.ADMIN)
+  @ApiResponse({
+    status: 200,
+    description: 'User role updated successfully.',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User role updated successfully' },
+        statusCode: { type: 'number', example: 200 },
+      },
+    },
+  })
+  @ApiNotFoundResponse({
+    description: 'User not found',
+    schema: {
+      type: 'object',
+      properties: {
+        message: { type: 'string', example: 'User not found' },
+        error: { type: 'string', example: 'Not Found' },
+        statusCode: { type: 'number', example: 404 },
+      },
+    },
+  })
+  @ApiResponse({
+    status: 400,
+    description: 'Invalid input',
+    content: {
+      'application/json': {
+        examples: {
+          invalidId: {
+            summary: 'Invalid user ID',
+            value: {
+              message: 'Invalid user ID',
+              statusCode: 400,
+            },
+          },
+          invalidRole: {
+            summary: 'Invalid role',
+            value: {
+              message: 'Invalid role',
+              statusCode: 400,
+            },
+          },
+        },
+      },
+    },
+  })
+  async updateUserRole(@Param('id') id: string, @Body('role') role: string) {
+    if (!ObjectId.isValid(id)) {
+      return { message: 'Invalid user ID', statusCode: 400 };
+    }
+    const res = await this.userService.updateUserRole(new ObjectId(id), role);
+    if (res.message === 'Invalid role') {
+      return { message: res.message, statusCode: 400 };
+    }
+    if (res.message === 'User not found') {
+      throw new NotFoundException('User not found');
+    }
+
+    if (res.message === 'User role updated successfully') {
+      return { message: 'User role updated successfully', statusCode: 200 };
+    }
+
+    return { message: 'User role update failed', statusCode: 500 };
   }
 
   //Fix later, commented out due to bugs
