@@ -7,14 +7,15 @@ import { plainToInstance } from 'class-transformer';
 import { getModelToken } from '@nestjs/mongoose';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { Model } from 'mongoose';
-import { JwtService } from '@nestjs/jwt';
 import { mock } from 'jest-mock-extended';
 import { UserRole } from './roles/user-role.enum';
+import { TokenService } from './token.service';
 
 describe('AuthService', () => {
   let service: AuthService;
   const userModel = mock<Model<UserDocument>>();
-  const jwtService = mock<JwtService>();
+  //const jwtService = mock<JwtService>();
+  const tokenService = mock<TokenService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -24,9 +25,13 @@ describe('AuthService', () => {
           provide: getModelToken(User.name),
           useValue: userModel,
         },
+        // {
+        //   provide: JwtService,
+        //   useValue: jwtService,
+        // },
         {
-          provide: JwtService,
-          useValue: jwtService,
+          provide: TokenService,
+          useValue: tokenService,
         },
       ],
     }).compile();
@@ -66,7 +71,9 @@ describe('AuthService', () => {
       }),
     } as any);
 
-    (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+    //(jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+    tokenService.generateAccessToken.mockResolvedValue('mocked-jwt-token');
+    tokenService.generateRefreshToken.mockResolvedValue('mocked-jwt-token');
 
     const res = await service.register(newUserDataDto);
 
@@ -81,7 +88,13 @@ describe('AuthService', () => {
       role: UserRole.USER,
     });
 
-    expect(jwtService.sign).toHaveBeenCalledWith({
+    expect(tokenService.generateAccessToken).toHaveBeenCalledWith({
+      email: newUserData.email,
+      sub: '123',
+      role: UserRole.USER,
+    });
+
+    expect(tokenService.generateRefreshToken).toHaveBeenCalledWith({
       email: newUserData.email,
       sub: '123',
       role: UserRole.USER,
@@ -89,7 +102,8 @@ describe('AuthService', () => {
 
     expect(res).toEqual({
       message: 'User registered successfully',
-      token: 'mocked-jwt-token',
+      access_token: 'mocked-jwt-token',
+      refresh_token: 'mocked-jwt-token',
       userId: '123',
     });
   });
@@ -107,18 +121,22 @@ describe('AuthService', () => {
     const errors = await validate(newUserDataDto);
     expect(errors.length).toBe(0);
 
-    (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+    //(jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+    tokenService.generateAccessToken.mockResolvedValue('mocked-jwt-token');
+    tokenService.generateRefreshToken.mockResolvedValue('mocked-jwt-token');
 
     userModel.findOne.mockResolvedValueOnce({
       ...newUserData,
       _id: '123',
+      role: UserRole.USER,
     } as any);
 
     const res = await service.register(newUserDataDto);
 
     expect(res).toEqual({
       message: 'User with this email already exists',
-      token: null,
+      access_token: null,
+      refresh_token: null,
       userId: null,
     });
   });
@@ -142,9 +160,12 @@ describe('AuthService', () => {
       ...newUserData,
       password: hashedPassword,
       _id: '123',
+      role: UserRole.USER,
     } as any);
 
-    (jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+    //(jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
+    tokenService.generateAccessToken.mockResolvedValue('mocked-jwt-token');
+    tokenService.generateRefreshToken.mockResolvedValue('mocked-jwt-token');
 
     const res = await service.login(newUserData.email, newUserData.password);
 
@@ -154,7 +175,8 @@ describe('AuthService', () => {
 
     expect(res).toEqual({
       message: 'User logged successfully',
-      token: 'mocked-jwt-token',
+      access_token: 'mocked-jwt-token',
+      refresh_token: 'mocked-jwt-token',
       userId: '123',
     });
   });
@@ -177,7 +199,8 @@ describe('AuthService', () => {
 
     expect(res).toEqual({
       message: 'User does not exist',
-      token: null,
+      access_token: null,
+      refresh_token: null,
       userId: null,
     });
   });
@@ -201,6 +224,7 @@ describe('AuthService', () => {
       ...newUserData,
       password: hashedPassword,
       _id: '123',
+      role: UserRole.USER,
     } as any);
 
     const res = await service.login(
@@ -214,7 +238,8 @@ describe('AuthService', () => {
 
     expect(res).toEqual({
       message: 'Bad password',
-      token: null,
+      access_token: null,
+      refresh_token: null,
       userId: null,
     });
   });
