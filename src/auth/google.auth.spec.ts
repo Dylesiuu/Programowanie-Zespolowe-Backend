@@ -2,16 +2,17 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { GoogleAuth } from './google.auth';
 import { ConfigService } from '@nestjs/config';
 import { getModelToken } from '@nestjs/mongoose';
-import { JwtService } from '@nestjs/jwt';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { Model } from 'mongoose';
 import { InternalServerErrorException } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
+import { TokenService } from './token.service';
+import { UserRole } from './roles/user-role.enum';
 
 describe('GoogleAuth', () => {
   let googleAuth: GoogleAuth;
   const userModel = mock<Model<UserDocument>>();
-  const jwtService = mock<JwtService>();
+  const tokenService = mock<TokenService>();
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
@@ -40,8 +41,8 @@ describe('GoogleAuth', () => {
           useValue: userModel,
         },
         {
-          provide: JwtService,
-          useValue: jwtService,
+          provide: TokenService,
+          useValue: tokenService,
         },
       ],
     }).compile();
@@ -58,16 +59,22 @@ describe('GoogleAuth', () => {
       name: { givenName: 'John', familyName: 'Doe' },
       emails: [{ value: 'john.doe@example.com' }],
     };
-    const user = { email: 'john.doe@example.com', _id: '123' };
+    const user = {
+      email: 'john.doe@example.com',
+      _id: '123',
+      role: UserRole.USER,
+    };
     userModel.findOne.mockResolvedValue(user);
-    jwtService.sign.mockReturnValue('test-token');
+    tokenService.generateAccessToken.mockResolvedValue('test-token');
+    tokenService.generateRefreshToken.mockResolvedValue('test-token');
 
     const done = jest.fn();
     await googleAuth.validate('accessToken', 'refreshToken', profile, done);
 
     expect(done.mock.calls[0][0]).toBe(null);
     expect(done.mock.calls[0][1]).toEqual({
-      token: 'test-token',
+      access_token: 'test-token',
+      refresh_token: 'test-token',
       userId: user._id,
       isFirstLogin: false,
     });
@@ -81,21 +88,26 @@ describe('GoogleAuth', () => {
     userModel.findOne.mockResolvedValue(null);
 
     const newUser = {
-      save: jest
-        .fn()
-        .mockResolvedValue({ email: 'john.doe@example.pl', _id: '123' }),
+      save: jest.fn().mockResolvedValue({
+        email: 'john.doe@example.pl',
+        _id: '123',
+        role: UserRole.USER,
+      }),
       _id: '123',
+      role: UserRole.USER,
     };
     userModel.create.mockReturnValue(newUser as any);
 
-    jwtService.sign.mockReturnValue('test-token');
+    tokenService.generateAccessToken.mockResolvedValue('test-token');
+    tokenService.generateRefreshToken.mockResolvedValue('test-token');
 
     const done = jest.fn();
     await googleAuth.validate('accessToken', 'refreshToken', profile, done);
 
     expect(done.mock.calls[0][0]).toBe(null);
     expect(done.mock.calls[0][1]).toEqual({
-      token: 'test-token',
+      access_token: 'test-token',
+      refresh_token: 'test-token',
       userId: '123',
       isFirstLogin: true,
     });

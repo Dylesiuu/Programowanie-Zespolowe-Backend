@@ -9,15 +9,15 @@ import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
-import { JwtService } from '@nestjs/jwt';
 import { UserRole } from './roles/user-role.enum';
+import { TokenService } from './token.service';
 
 @Injectable()
 export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
   constructor(
     private configService: ConfigService,
     @InjectModel(User.name) private userModel: Model<User>,
-    private jwtService: JwtService,
+    private readonly tokenService: TokenService,
   ) {
     super({
       clientID: configService.get<string>('GOOGLE_CLIENT_ID'),
@@ -44,8 +44,11 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           sub: user._id,
           role: user.role,
         };
-        const token = this.jwtService.sign(payload);
-        done(null, { token, userId: user._id, isFirstLogin: false });
+        const access_token =
+          await this.tokenService.generateAccessToken(payload);
+        const refresh_token =
+          await this.tokenService.generateRefreshToken(payload);
+        done(null, { access_token, refresh_token, userId: user._id, isFirstLogin: false });
       } else {
         const newUser = await this.userModel.create({
           name: name.givenName,
@@ -62,8 +65,11 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           sub: newUser._id,
           role: newUser.role,
         };
-        const token = this.jwtService.sign(payload);
-        done(null, { token, userId: newUser._id, isFirstLogin: true });
+        const access_token =
+          await this.tokenService.generateAccessToken(payload);
+        const refresh_token =
+          await this.tokenService.generateRefreshToken(payload);
+        done(null, { access_token, refresh_token, userId: newUser._id, isFirstLogin: true });
       }
     } catch (error) {
       if (error instanceof UnauthorizedException) {

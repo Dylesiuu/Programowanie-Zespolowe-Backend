@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -21,6 +22,7 @@ import {
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { Public } from './decorators/public.decorator';
+import { response, Response } from 'express';
 
 @ApiTags('AuthenticationController')
 @Controller('auth')
@@ -68,14 +70,27 @@ export class AuthController {
     },
   })
   @ApiBody({ type: CreateUserDto })
-  async register(@Body() createUserDto: CreateUserDto) {
+  async register(
+    @Res({ passthrough: true }) response: Response,
+    @Body() createUserDto: CreateUserDto,
+  ) {
     const res = await this.authService.register(createUserDto);
 
     if (res.message === 'User with this email already exists') {
       throw new ConflictException(res.message);
     }
 
-    return { ...res, statusCode: 201 };
+    const token = res.access_token;
+    const message = res.message;
+
+    response.cookie('refresh_token', res.refresh_token, {
+      httpOnly: true, // Prevents JS access
+      secure: true, // HTTPS only
+      sameSite: 'strict', // Prevents CSRF
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return { token, message, statusCode: 201 };
   }
 
   @Public()
@@ -136,6 +151,7 @@ export class AuthController {
     },
   })
   async login(
+    @Res({ passthrough: true }) response: Response,
     @Body('email') email: string,
     @Body('password') password: string,
   ) {
@@ -149,7 +165,17 @@ export class AuthController {
       throw new ConflictException(res.message);
     }
 
-    return { ...res, statusCode: 200 };
+    const token = res.access_token;
+    const message = res.message;
+
+    response.cookie('refresh_token', res.refresh_token, {
+      httpOnly: true, // Prevents JS access
+      secure: true, // HTTPS only
+      sameSite: 'strict', // Prevents CSRF
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
+
+    return { token, message, statusCode: 200 };
   }
 
   @Public()
@@ -200,11 +226,21 @@ export class AuthController {
       },
     },
   })
-  async googleAuthRedirect(@Req() req) {
+  async googleAuthRedirect(
+    @Res({ passthrough: true }) response: Response,
+    @Req() req,
+  ) {
     const user = req.user;
-    const token = user.token;
+    const token = user.acces_token;
     const userId = user.userId;
     const isFirstLogin = user.isFirstLogin;
+
+    response.cookie('refresh_token', user.refresh_token, {
+      httpOnly: true, // Prevents JS access
+      secure: true, // HTTPS only
+      sameSite: 'strict', // Prevents CSRF
+      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+    });
     return {
       message: 'User logged successfully',
       token,
