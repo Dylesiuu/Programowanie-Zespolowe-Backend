@@ -1,8 +1,4 @@
-import {
-  BadRequestException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from '../user/schemas/user.schema';
@@ -54,6 +50,28 @@ export class UserService {
       { password: hashedPassword },
       { new: true },
     );
+  }
+
+  async updateUserRole(
+    id: ObjectId,
+    newRole: string,
+  ): Promise<{ message: string }> {
+    const validRoles = ['admin', 'user', 'employee'];
+
+    if (!validRoles.includes(newRole)) {
+      return { message: 'Invalid role' };
+    }
+    const user = await this.userModel.findOneAndUpdate(
+      { _id: id },
+      { role: newRole },
+      { new: true },
+    );
+
+    if (!user) {
+      return { message: 'User not found' };
+    }
+
+    return { message: 'User role updated successfully' };
   }
 
   //Fix later, commented out due to bugs
