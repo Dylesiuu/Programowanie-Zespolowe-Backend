@@ -2,7 +2,6 @@ import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import mongoose, { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
-import { Pet } from './schema/pet.schema';
 import { matchUserWithAnimals } from '../utils/matchUserWithAnimals';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import {
@@ -14,11 +13,14 @@ import {
   AnimalTraitDocument,
 } from '../traits/schemas/animalTrait.schema';
 import { Shelter, ShelterDocument } from '../shelters/schemas/shelter.schema';
+import { Animal, AnimalDocument } from '../animals/schemas/animal.schema';
+import { calculateAge } from '../utils/calculateAge';
 
 @Injectable()
 export class ScrollingService {
   constructor(
-    @InjectModel(Pet.name) private readonly petModel: Model<Pet>,
+    @InjectModel(Animal.name)
+    private readonly animalModel: Model<AnimalDocument>,
     @InjectModel(User.name) private readonly userModel: Model<UserDocument>,
     @InjectModel(UserTrait.name)
     private readonly userTraitModel: Model<UserTraitDocument>,
@@ -28,29 +30,39 @@ export class ScrollingService {
     private readonly shelterModel: Model<ShelterDocument>,
   ) {}
 
-  async getPetbyIndex(id: string): Promise<Pet | { message: string }> {
+  async getPetbyIndex(id: string): Promise<Animal | { message: string }> {
     if (!mongoose.isValidObjectId(id)) {
       return { message: 'Index is Invalid.' };
     }
     const index = new ObjectId(id);
-    const result = await this.petModel.findOne({ _id: index });
+    const result = await this.animalModel.findOne({ _id: index });
     if (!result) {
       return { message: 'Pet not found.' };
     }
-    return result;
+    const animalWithAge = {
+      ...result.toObject(),
+      age: calculateAge(result.birthYear, result.birthMonth),
+    };
+
+    return animalWithAge;
   }
 
-  async getAll(): Promise<Pet[] | { message: string }> {
-    const result = await this.petModel.find();
+  async getAll(): Promise<Animal[] | { message: string }> {
+    const result = await this.animalModel.find();
 
     if (result.length === 0) {
       return { message: 'No pets found.' };
     }
 
-    return result;
+    const animalWithAge = result.map((animal) => ({
+      ...animal.toObject(),
+      age: calculateAge(animal.birthYear, animal.birthMonth),
+    }));
+
+    return animalWithAge;
   }
 
-  async getPetbyName(name: string): Promise<Pet[] | { message: string }> {
+  async getPetbyName(name: string): Promise<Animal[] | { message: string }> {
     if (!name || typeof name !== 'string') {
       return { message: 'Invalid input.' };
     }
@@ -66,7 +78,7 @@ export class ScrollingService {
     const sanitizedName = name.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
     try {
-      const matchingPets = await this.petModel.find({
+      const matchingPets = await this.animalModel.find({
         name: { $regex: `^${sanitizedName}$`, $options: 'i' },
       });
 
@@ -74,7 +86,12 @@ export class ScrollingService {
         return { message: 'Pet not found.' };
       }
 
-      return matchingPets;
+      const matchingPetsWithAge = matchingPets.map((animal) => ({
+        ...animal.toObject(),
+        age: calculateAge(animal.birthYear, animal.birthMonth),
+      }));
+
+      return matchingPetsWithAge;
     } catch (error) {
       return { message: 'An message occurred while fetching pets.' };
     }
@@ -97,7 +114,7 @@ export class ScrollingService {
       },
     });
 
-    const allAnimals = await this.petModel.find({
+    const allAnimals = await this.animalModel.find({
       shelter: { $in: shelters.map((shelter) => shelter._id) },
     });
 
@@ -114,7 +131,7 @@ export class ScrollingService {
 
     const userWithTraits = user.toObject();
 
-    const allAnimalsTmp = await this.petModel.find().populate('traits');
+    const allAnimalsTmp = await this.animalModel.find().populate('traits');
 
     const allAnimalsWithTraits = allAnimalsTmp.map((animal) =>
       animal.toObject(),

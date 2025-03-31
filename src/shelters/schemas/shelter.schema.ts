@@ -7,7 +7,7 @@ export class Shelter {
   @Prop({ required: true })
   location: [number, number];
 
-  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Pet' }] })
+  @Prop({ type: [{ type: MongooseSchema.Types.ObjectId, ref: 'Animal' }] })
   animals: MongooseSchema.Types.ObjectId[];
 }
 
