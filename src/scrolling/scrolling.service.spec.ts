@@ -198,6 +198,87 @@ const mockAnimalTraits = [
   },
 ];
 
+const mockAnimalWithTraits = [
+  {
+    _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
+    name: 'Spongebob',
+    birthYear: 2020,
+    birthMonth: 3,
+    description: 'pochodzi z warszawy',
+    gender: 'Pies',
+    shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
+    traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
+    images: [
+      'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
+    ],
+    toObject: jest.fn().mockReturnValue({
+      _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
+      name: 'Spongebob',
+      birthYear: 2020,
+      birthMonth: 3,
+      description: 'pochodzi z warszawy',
+      gender: 'Pies',
+      shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
+      traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
+      images: [
+        'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
+      ],
+    }),
+  },
+  {
+    _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
+    name: 'Pomelo',
+    birthYear: 2020,
+    birthMonth: 3,
+    description: 'pochodzi z torunia',
+    gender: 'Suka',
+    shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
+    traits: [mockAnimalTraits[2]],
+    images: [
+      'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+    ],
+    toObject: jest.fn().mockReturnValue({
+      _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
+      name: 'Pomelo',
+      birthYear: 2020,
+      birthMonth: 3,
+      description: 'pochodzi z torunia',
+      gender: 'Suka',
+      shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
+      traits: [mockAnimalTraits[2]],
+      images: [
+        'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+      ],
+    }),
+  },
+  {
+    _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
+    name: 'Spongebob',
+    birthYear: 2020,
+    birthMonth: 3,
+    description: 'pochodzi z bydgoszczy',
+    gendedr: 'Pies',
+    shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
+    traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
+    images: [
+      'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
+    ],
+    toObject: jest.fn().mockReturnValue({
+      _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
+      name: 'Spongebob',
+      birthYear: 2020,
+      birthMonth: 3,
+      description: 'pochodzi z bydgoszczy',
+      gender: 'Pies',
+      shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
+      traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
+      images: [
+        'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
+      ],
+    }),
+  },
+];
+
 describe('ScrollingService', () => {
   let service: ScrollingService;
   const animalModel = mock<Model<AnimalDocument>>();
@@ -301,7 +382,7 @@ describe('ScrollingService', () => {
       const { toObject, ...rest } = animal;
       return { ...rest, age: calculateAge(rest.birthYear, rest.birthMonth) };
     });
-    
+
     expect(result).toEqual(expectedResult);
   });
 
@@ -331,87 +412,6 @@ describe('ScrollingService', () => {
         animals: [
           '63e4d5a7f1a2b3c4d5e6f7b9', //(Spongebob z Bydgoszczy)
         ],
-      },
-    ];
-
-    const mockAnimalWithTraits = [
-      {
-        _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
-        name: 'Spongebob',
-        birthYear: 2020,
-        birthMonth: 3,
-        description: 'pochodzi z warszawy',
-        gender: 'Pies',
-        shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
-        traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
-        images: [
-          'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
-        ],
-        toObject: jest.fn().mockReturnValue({
-          _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
-          name: 'Spongebob',
-          birthYear: 2020,
-          birthMonth: 3,
-          description: 'pochodzi z warszawy',
-          gender: 'Pies',
-          shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
-          traits: [mockAnimalTraits[0], mockAnimalTraits[1]],
-          images: [
-            'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
-          ],
-        }),
-      },
-      {
-        _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
-        name: 'Pomelo',
-        birthYear: 2020,
-        birthMonth: 3,
-        description: 'pochodzi z torunia',
-        gender: 'Suka',
-        shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
-        traits: [mockAnimalTraits[2]],
-        images: [
-          'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
-        ],
-        toObject: jest.fn().mockReturnValue({
-          _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
-          name: 'Pomelo',
-          birthYear: 2020,
-          birthMonth: 3,
-          description: 'pochodzi z torunia',
-          gender: 'Suka',
-          shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
-          traits: [mockAnimalTraits[2]],
-          images: [
-            'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
-          ],
-        }),
-      },
-      {
-        _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
-        name: 'Spongebob',
-        birthYear: 2020,
-        birthMonth: 3,
-        description: 'pochodzi z bydgoszczy',
-        gendedr: 'Pies',
-        shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
-        traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
-        images: [
-          'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
-        ],
-        toObject: jest.fn().mockReturnValue({
-          _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
-          name: 'Spongebob',
-          birthYear: 2020,
-          birthMonth: 3,
-          description: 'pochodzi z bydgoszczy',
-          gender: 'Pies',
-          shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
-          traits: [mockAnimalTraits[0], mockAnimalTraits[3]],
-          images: [
-            'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
-          ],
-        }),
       },
     ];
 
@@ -447,8 +447,10 @@ describe('ScrollingService', () => {
 
   it('shuld return message if no pets found', async () => {
     shelterModel.find.mockResolvedValue([]);
-    animalModel.find.mockResolvedValue([]);
     userModel.findById.mockResolvedValue(mockUsers[2]);
+    animalModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue([]),
+    } as any);
 
     const res = await service.match(mockUsers[2]._id, 52.2297, 21.0122, 1000);
     expect(res).toEqual({ message: 'No pets found.' });
@@ -473,7 +475,9 @@ describe('ScrollingService', () => {
       },
     ];
     shelterModel.find.mockResolvedValue(mockShleters);
-    animalModel.find.mockResolvedValue(mockPet);
+    animalModel.find.mockReturnValue({
+      populate: jest.fn().mockResolvedValue(mockAnimalWithTraits),
+    } as any);
     userModel.findById.mockReturnValue({
       populate: jest.fn().mockResolvedValue(null),
     } as any);

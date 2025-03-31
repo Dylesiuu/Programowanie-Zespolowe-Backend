@@ -114,9 +114,11 @@ export class ScrollingService {
       },
     });
 
-    const allAnimals = await this.animalModel.find({
-      shelter: { $in: shelters.map((shelter) => shelter._id) },
-    });
+    const allAnimals = await this.animalModel
+      .find({
+        shelter: { $in: shelters.map((shelter) => shelter._id) },
+      })
+      .populate('traits');
 
     shelters = null;
 
@@ -131,11 +133,7 @@ export class ScrollingService {
 
     const userWithTraits = user.toObject();
 
-    const allAnimalsTmp = await this.animalModel.find().populate('traits');
-
-    const allAnimalsWithTraits = allAnimalsTmp.map((animal) =>
-      animal.toObject(),
-    );
+    const allAnimalsWithTraits = allAnimals.map((animal) => animal.toObject());
 
     const result = matchUserWithAnimals(userWithTraits, allAnimalsWithTraits);
 
