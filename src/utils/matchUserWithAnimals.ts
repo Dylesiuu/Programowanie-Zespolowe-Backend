@@ -1,3 +1,5 @@
+import { calculateAge } from './calculateAge';
+
 function calculateScore(userTraits, animalTraits) {
   let score = 0;
   let addedPoints = 0;
@@ -35,6 +37,7 @@ export function matchUserWithAnimals(user, allAnimals) {
         ...animal,
         score,
         isValid,
+        age: calculateAge(animal.birthYear, animal.birthMonth),
       };
     })
     .filter((animal) => animal.isValid);

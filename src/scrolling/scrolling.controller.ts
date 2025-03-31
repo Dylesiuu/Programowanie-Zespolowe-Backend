@@ -10,12 +10,10 @@ import { ScrollingService } from './scrolling.service';
 import { ObjectId } from 'mongodb';
 import mongoose from 'mongoose';
 import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
-import { Pet } from './schema/pet.schema';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/auth/roles/user-role.enum';
 import { ApiRoles } from 'src/decorators/api-roles.decorator';
 
-//@ApiBearerAuth()
 @ApiTags('ScrollingController')
 @Controller('scrolling')
 export class ScrollingController {
@@ -43,18 +41,21 @@ export class ScrollingController {
       type: 'object',
       properties: {
         result: {
-          type: 'Pet',
+          type: 'Animal',
           example: {
             _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
             name: 'Pomelo',
-            age: '2 lata',
-            discribtion: 'pochodzi z torunia',
+            birthYear: 2022,
+            birthMonth: 6,
+            description: 'pochodzi z torunia',
             gender: 'Suka',
-            location: 'Toruń',
-            shelter: 'Schronisko dla zwierząt w Toruniu',
+            type: true,
+            shelter: new ObjectId('60af8845e13b1c002b1a1b46'),
             traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
-            image:
+            images: [
               'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+            ],
+            age: '3 years',
           },
         },
         statusCode: { type: 'number', example: 200 },
@@ -145,7 +146,7 @@ export class ScrollingController {
     description: 'Pets found.',
     schema: {
       properties: {
-        Pets: {
+        Animals: {
           type: 'array',
           items: {
             type: 'object',
@@ -154,29 +155,35 @@ export class ScrollingController {
             {
               _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
               name: 'Pomelo',
-              age: '2 lata',
-              discribtion: 'pochodzi z torunia',
+              birthYear: 2022,
+              birthMonth: 6,
+              description: 'pochodzi z torunia',
               gender: 'Suka',
-              location: 'Toruń',
-              shelter: 'Schronisko dla zwierząt w Toruniu',
+              type: true,
+              shelter: new ObjectId('60af8845e13b1c002b1a1b46'),
               traits: [new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8')],
-              image:
+              images: [
                 'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+              ],
+              age: '3 years',
             },
             {
               _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7b9'),
               name: 'Spongebob',
-              age: '4 lata',
-              discribtion: 'pochodzi z bydgoszczy',
+              birthYear: 2020,
+              birthMonth: 3,
+              description: 'pochodzi z bydgoszczy',
               gender: 'Pies',
-              location: 'Bydgoszcz',
-              shelter: 'Schronisko dla Zwierząt w Bydgoszczy',
+              type: false,
+              shelter: new ObjectId('60af8845e13b1c002b1a1b47'),
               traits: [
                 new ObjectId('507f1f77bcf86cd799439011'),
                 new ObjectId('4e4d5a7f1a2b3c4d5e6f7a89'),
               ],
-              image:
+              images: [
                 'https://dogshome.com/wp-content/uploads/animalimages//1139184/556697c795ff443c8969ac1c81f9a95a-1728272579-1728272583_other.jpg',
+              ],
+              age: '5 years',
             },
           ],
         },
@@ -214,7 +221,7 @@ export class ScrollingController {
   @ApiOperation({
     description:
       'This endpoint allows you to match a user with a pet. ' +
-      'The user must provide their ID, longitude, and latitude. ' +
+      'The user must provide their ID, longitude, latitude and range in **meters**. ' +
       'If the user is found, the endpoint will return a list of pets that match the user. ' +
       'If the user is not found or no pets are found, the endpoint will return an error message. ',
     summary: 'Match a user with a pet',
@@ -235,10 +242,12 @@ export class ScrollingController {
             {
               _id: new ObjectId('48a1b2c3d4e5f6a7b8c9d0e2'),
               name: 'Spongebob',
-              age: '1 rok',
-              discribtion: 'pochodzi z warszawy',
+              birthYear: 2023,
+              birthMonth: 6,
+              description: 'pochodzi z warszawy',
               gender: 'Pies',
-              shelter: '60a1b2c3d4e5f6a7b8c9d0e1',
+              type: false,
+              shelter: new ObjectId('60a1b2c3d4e5f6a7b8c9d0e1'),
               traits: [
                 {
                   _id: new ObjectId('507f1f77bcf86cd799439011'),
@@ -251,16 +260,20 @@ export class ScrollingController {
                   priority: 2,
                 },
               ],
-              image:
+              images: [
                 'https://pettownsendvet.com/wp-content/uploads/2023/01/iStock-1052880600-1024x683.jpg',
+              ],
+              age: '2 years',
             },
             {
               _id: new ObjectId('72f1a2b3c4d5e6f7a8b9c0d3'),
               name: 'Pomelo',
-              age: '2 lata',
-              discribtion: 'pochodzi z torunia',
+              birthYear: 2022,
+              birthMonth: 4,
+              description: 'pochodzi z torunia',
               gender: 'Suka',
-              shelter: '70f1a2b3c4d5e6f7a8b9c0d2',
+              type: true,
+              shelter: new ObjectId('70f1a2b3c4d5e6f7a8b9c0d2'),
               traits: [
                 {
                   _id: new ObjectId('63e4d5a7f1a2b3c4d5e6f7a8'),
@@ -268,8 +281,10 @@ export class ScrollingController {
                   priority: 3,
                 },
               ],
-              image:
+              images: [
                 'https://www.rspcasa.org.au/wp-content/uploads/2024/08/Cat-Management-Act-Review-2-768x527.png',
+              ],
+              age: '3 years',
             },
           ],
         },
@@ -319,7 +334,7 @@ export class ScrollingController {
               statusCode: 404,
             },
           },
-          petsNotFound: {
+          animalsNotFound: {
             summary: 'Pets not found',
             value: {
               message: 'No pets found.',
@@ -392,12 +407,10 @@ export class ScrollingController {
     );
 
     if (result.message === 'User not found.') {
-      //return { message: 'User not found.' };
       throw new NotFoundException('User not found.');
     }
 
     if (result.message === 'No pets found.') {
-      //return { message: 'No pets found.' };
       throw new NotFoundException('No pets found.');
     }
 

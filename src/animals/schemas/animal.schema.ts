@@ -54,7 +54,7 @@ export class Animal {
     example: '60af8845e13b1c002b1a1b45',
     description: 'Reference to the shelter (ObjectId)',
   })
-  @Prop({ type: MongooseSchema.Types.ObjectId, required: true })
+  @Prop({ type: MongooseSchema.Types.ObjectId, required: true, ref: 'Shelter' })
   shelter: MongooseSchema.Types.ObjectId;
 
   @ApiProperty({
