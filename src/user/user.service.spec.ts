@@ -4,6 +4,8 @@ import { getModelToken } from '@nestjs/mongoose';
 import { User } from '../auth/schemas/user.schema';
 import { Model } from 'mongoose';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import * as bcrypt from 'bcrypt';
+import { mock } from 'jest-mock-extended';
 
 const mockUser = {
   email: 'Geralt@rivia.com',
@@ -16,30 +18,42 @@ const mockUser = {
   ],
 };
 
+//const mockUserService = mock<UserService>();
+//const mockUserModel = mock<Model<User>>();
+
 const mockUserModel = {
   findOne: jest.fn().mockImplementation(({ email }) =>
-    email === mockUser.email 
-      ? { exec: jest.fn().mockResolvedValue(mockUser) }
-      : { exec: jest.fn().mockResolvedValue(null) }
+    email === 'Geralt@rivia.com' 
+      ? Promise.resolve({
+                       ...mockUser , 
+                       save: jest.fn().mockImplementation(function () {return Promise.resolve(this);}) 
+                      })  
+      : Promise.resolve(null)
   ),
-  find: jest.fn().mockImplementation(() => ({
-    exec: jest.fn().mockResolvedValue([mockUser]),
-  })),
+
+  find: jest.fn().mockResolvedValue([mockUser]),
+
   findOneAndUpdate: jest.fn().mockImplementation((query, update) => {
-    const updatedUser = { ...mockUser , ...update };
+    if (query.email !== mockUser.email) return Promise.resolve(null);
 
-    if (update.$push && update.$push.traits) {
-      updatedUser.traits.push(update.$push.traits);
-    }
-    if (update.$pull && update.$pull.traits) {
-      updatedUser.traits = updatedUser.traits.filter(trait => trait.tagId !== update.$pull.traits.tagId);
+    if (update.password) {
+      mockUser.password = update.password;
     }
 
-    return {
-      exec: jest.fn().mockResolvedValue(updatedUser),
-    };
+
+    if (update.$set?.traits) {
+      mockUser.traits = [...update.$set.traits];
+    }
+    if (update.$pull?.traits) {
+      const tagIdToRemove = update.$pull.traits.tagId;
+      mockUser.traits = mockUser.traits.filter(trait => trait.tagId !== tagIdToRemove);
+    }
+
+    return Promise.resolve(mockUser);
   }),
 };
+
+
 
 describe('UserService', () => {
   let service: UserService;
@@ -49,12 +63,17 @@ describe('UserService', () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         UserService,
-        { provide: getModelToken(User.name), useValue: mockUserModel },
+        { provide: getModelToken(User.name),
+           useValue: mockUserModel },
       ],
     }).compile();
 
     service = module.get<UserService>(UserService);
     model = module.get<Model<User>>(getModelToken(User.name));
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
   });
 
   it('should be defined', () => {
@@ -63,7 +82,7 @@ describe('UserService', () => {
 
   it('should find a user by email', async () => {
     const user = await service.findByEmail('Geralt@rivia.com');
-    expect(user).toEqual(mockUser);
+    expect(user).toMatchObject(mockUser);
     expect(model.findOne).toHaveBeenCalledWith({ email: 'Geralt@rivia.com' });
   });
 
@@ -74,14 +93,13 @@ describe('UserService', () => {
 
   it('should return all users', async () => {
     const users = await service.findAll();
-    expect(users).toEqual([mockUser]);
+    expect(users).toMatchObject([mockUser]);
     expect(model.find).toHaveBeenCalled();
   });
 
   it('should update user name', async () => {
     const updatedUser = await service.updateUserName('Geralt@rivia.com', 'Rzeznik');
     expect(updatedUser.name).toBe('Rzeznik');
-    expect(model.findOneAndUpdate).toHaveBeenCalledWith({ email: 'Geralt@rivia.com' }, { name: 'Rzeznik' }, { new: true });
   });
 
   it('should update user lastname', async () => {
@@ -93,10 +111,10 @@ describe('UserService', () => {
     const updatePasswordDto: UpdatePasswordDto = {
       password: 'Yennefer123!',
     };
-  
     const updatedUser = await service.updateUserPassword('Geralt@rivia.com', updatePasswordDto);
-  
     expect(updatedUser.password).not.toBe('Zaraza123');
+    const isPasswordCorrect = await bcrypt.compare('Yennefer123!', updatedUser.password);
+    expect(isPasswordCorrect).toBe(true);
     expect(updatedUser.password).toBeDefined();
   });
 
@@ -112,22 +130,52 @@ describe('UserService', () => {
 
   it('should add trait', async () => {
     const newTrait = { tagId: 3, priority: 1, name: 'Mage' };
-    const updatedUser = await service.addTrait('Geralt@rivia.com', newTrait);
+    console.log('mockUser.traits', mockUser.traits);
+    const updatedUser = await service.addTrait('Geralt@rivia.com', [newTrait]);
+    console.log('updatedUser.traits', updatedUser.traits);
     expect(updatedUser.traits).toContainEqual(newTrait);
-    expect(model.findOneAndUpdate).toHaveBeenCalledWith(
+  
+    expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
-      { $push: { traits: newTrait } },
+      { $set: { traits: [...mockUser.traits.filter(t => t.tagId !== newTrait.tagId), newTrait] } },
+      { new: true }
+    );
+  });
+
+  it('should add 2 trait', async () => {
+    const newTraits = [
+      { tagId: 3, priority: 1, name: 'Mage' },
+      { tagId: 4, priority: 2, name: 'Alchemist' },
+    ];
+    console.log('mockUser.traits', mockUser.traits);
+    const updatedUser = await service.addTrait('Geralt@rivia.com', newTraits);
+    console.log('updatedUser.traits', updatedUser.traits);
+    expect(updatedUser.traits).toContainEqual(newTraits[0]);
+    expect(updatedUser.traits).toContainEqual(newTraits[1]);
+  
+    expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { email: 'Geralt@rivia.com' },
+      { $set: { traits: expect.arrayContaining([...mockUser.traits, ...newTraits]) } },
       { new: true }
     );
   });
 
   it('should remove trait', async () => {
-    const updatedUser = await service.removeTrait('Geralt@rivia.com', 1); 
+    const expectedTraits = [
+      { tagId: 2, priority: 2, name: 'Strategist' },
+      { tagId: 3, priority: 1, name: 'Mage' },
+      { tagId: 4, priority: 2, name: 'Alchemist' },
+    ];
+    const updatedUser = await service.removeTrait('Geralt@rivia.com', [{ tagId: 1 }]); 
     expect(updatedUser.traits).not.toContainEqual(expect.objectContaining({ tagId: 1 }));
     expect(model.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
-      { $pull: { traits: { tagId: 1 } } },
+      { $set: { traits: expectedTraits } },  
       { new: true }
     );
   });
+
+  it('should add favourite', async () => {
+    
+
 });

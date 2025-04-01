@@ -4,25 +4,32 @@ import { Model } from 'mongoose';
 import { User, UserDocument } from '../auth/schemas/user.schema';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
+import e from 'express';
 
 @Injectable()
 export class UserService {
   constructor(@InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
   async findByEmail(email: string): Promise<User | null> {
-    return this.userModel.findOne({ email }).exec();
+    return this.userModel.findOne({ email });
   }
 
   async findAll(): Promise<User[]> {
-    return this.userModel.find().exec();
+    return this.userModel.find();
   }
 
   async updateUserName(email: string, newName: string): Promise<User | null> {
-    return this.userModel.findOneAndUpdate({ email }, { name: newName }, { new: true }).exec();
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.name = newName;
+    return await user.save();
   }
 
   async updateUserLastname(email: string, newLastname: string): Promise<User | null> {
-    return this.userModel.findOneAndUpdate({ email }, { lastname: newLastname }, { new: true }).exec();
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.lastname = newLastname;
+    return await user.save();
   }
 
   async updateUserPassword(email: string, updatePasswordDto: UpdatePasswordDto): Promise<User | null> {
@@ -34,11 +41,54 @@ export class UserService {
       { email },
       { password: hashedPassword }, 
       { new: true }
-    ).exec();
+    );
   }
 
+  async doesFavouriteExist(email: string, favouriteId: number): Promise<boolean> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    return user.favourites.includes(favouriteId);
+  }
+  
+  async addFavourite(email: string, favourites: number[]) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.favourites = user.favourites || [];
+    const newFavourites = favourites.filter(favouriteId => !user.favourites.includes(favouriteId));
+  
+    if (newFavourites.length > 0) {
+      user.favourites = [...user.favourites, ...newFavourites];
+    }
+  
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { $set: { favourites: user.favourites } },
+      { new: true }
+    );
+  }
+
+  async removeFavourite(email: string, favourites: number[]) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.favourites = user.favourites || [];
+
+    for (const favouriteId of favourites) {
+      const exists = await this.doesFavouriteExist(email, favouriteId);
+      if (exists) {
+        user.favourites = user.favourites.filter(existingFavourite => existingFavourite !== favouriteId);
+      }
+    }
+
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { $set: { favourites: user.favourites } },
+      { new: true }
+    );
+  }
+
+
   async doesTraitExist(email: string, tagId: number): Promise<boolean> {
-    const user = await this.userModel.findOne({ email }).exec();
+    const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
 
     if (!user.traits) {
@@ -48,38 +98,44 @@ export class UserService {
     return user.traits.some((trait) => trait.tagId === Number(tagId));
   }
 
-  async addTrait(email: string, trait: { tagId: number; priority: number; name: string }) {
+
+
+  async addTrait(email: string, traits:{ tagId: number; priority: number; name: string }[] ) {
     const user = await this.userModel.findOne({ email });
-    if (!user) throw new NotFoundException('User not found');
+  if (!user) throw new NotFoundException('User not found');
+  user.traits = user.traits || [];
 
-    user.traits = user.traits || [];
+  const newTraits = traits.filter(trait => !user.traits.some(existingTrait => existingTrait.tagId === trait.tagId));
 
+  if (newTraits.length > 0) {
+    user.traits = [...user.traits, ...newTraits];
+  }
+
+  return this.userModel.findOneAndUpdate(
+    { email },
+    { $set: { traits: user.traits } },
+    { new: true }
+  );
+}
+
+async removeTrait(email: string, traits: { tagId: number }[]) {
+  const user = await this.userModel.findOne({ email });
+  if (!user) throw new NotFoundException('User not found');
+  user.traits = user.traits || [];
+
+  for (const trait of traits) {
     const exists = await this.doesTraitExist(email, trait.tagId);
-    if (exists) throw new BadRequestException('Trait already exists');
-
-    user.traits.push(trait);
-    return this.userModel.findOneAndUpdate(
-      { email },
-      { $push: { traits: trait } },
-      { new: true }
-    ).exec();
+    if (exists) {
+      // Usuwamy trait z tablicy
+      user.traits = user.traits.filter(existingTrait => existingTrait.tagId !== trait.tagId);
+    }
   }
 
-  async removeTrait(email: string, tagId: number) {
-    const user = await this.userModel.findOne({ email });
-    if (!user) throw new NotFoundException('User not found');
-
-    user.traits = user.traits || [];
-
-    const exists = await this.doesTraitExist(email, tagId);
-    if (!exists) throw new BadRequestException('Trait not found');
-
-    user.traits = user.traits.filter((trait) => trait.tagId !== tagId);
-    return this.userModel.findOneAndUpdate(
-      { email },
-      { $pull: { traits: { tagId } } },
-      { new: true }
-    ).exec();
-  }
+  return this.userModel.findOneAndUpdate(
+    { email },
+    { $set: { traits: user.traits } },
+    { new: true }
+  );
+}
 
 }
