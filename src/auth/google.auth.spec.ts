@@ -67,6 +67,8 @@ describe('GoogleAuth', () => {
     userModel.findOne.mockResolvedValue(user);
     tokenService.generateAccessToken.mockResolvedValue('test-token');
     tokenService.generateRefreshToken.mockResolvedValue('test-token');
+    tokenService.saveRefreshToken.mockResolvedValue(true);
+    tokenService.deleteRefreshToken.mockResolvedValue(true);
 
     const done = jest.fn();
     await googleAuth.validate('accessToken', 'refreshToken', profile, done);
@@ -91,15 +93,24 @@ describe('GoogleAuth', () => {
       save: jest.fn().mockResolvedValue({
         email: 'john.doe@example.pl',
         _id: '123',
+        password: 'google-oauth',
+        name: profile.name.givenName,
+        lastname: profile.name.familyName,
         role: UserRole.USER,
       }),
+      email: 'john.doe@example.pl',
       _id: '123',
+      password: 'google-oauth',
+      name: profile.name.givenName,
+      lastname: profile.name.familyName,
       role: UserRole.USER,
     };
-    userModel.create.mockReturnValue(newUser as any);
+    userModel.create.mockResolvedValue(newUser as any);
 
     tokenService.generateAccessToken.mockResolvedValue('test-token');
     tokenService.generateRefreshToken.mockResolvedValue('test-token');
+    tokenService.saveRefreshToken.mockResolvedValue(true);
+    tokenService.deleteRefreshToken.mockResolvedValue(true);
 
     const done = jest.fn();
     await googleAuth.validate('accessToken', 'refreshToken', profile, done);
