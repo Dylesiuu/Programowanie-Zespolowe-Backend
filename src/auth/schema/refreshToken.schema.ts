@@ -6,7 +6,7 @@ export type RefreshTokenDocument = RefreshToken & Document;
 @Schema()
 export class RefreshToken {
   @Prop({ type: MongooseSchema.Types.ObjectId, ref: 'User', required: true })
-  userId: string;
+  userId: MongooseSchema.Types.ObjectId;
 
   @Prop({ required: true })
   token: string;

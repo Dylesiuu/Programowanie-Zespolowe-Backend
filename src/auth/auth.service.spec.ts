@@ -14,7 +14,6 @@ import { TokenService } from './token.service';
 describe('AuthService', () => {
   let service: AuthService;
   const userModel = mock<Model<UserDocument>>();
-  //const jwtService = mock<JwtService>();
   const tokenService = mock<TokenService>();
 
   beforeEach(async () => {
@@ -25,10 +24,6 @@ describe('AuthService', () => {
           provide: getModelToken(User.name),
           useValue: userModel,
         },
-        // {
-        //   provide: JwtService,
-        //   useValue: jwtService,
-        // },
         {
           provide: TokenService,
           useValue: tokenService,
@@ -71,9 +66,10 @@ describe('AuthService', () => {
       }),
     } as any);
 
-    //(jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
     tokenService.generateAccessToken.mockResolvedValue('mocked-jwt-token');
     tokenService.generateRefreshToken.mockResolvedValue('mocked-jwt-token');
+    tokenService.deleteRefreshToken.mockResolvedValue(true);
+    tokenService.saveRefreshToken.mockResolvedValue(true);
 
     const res = await service.register(newUserDataDto);
 
@@ -121,9 +117,9 @@ describe('AuthService', () => {
     const errors = await validate(newUserDataDto);
     expect(errors.length).toBe(0);
 
-    //(jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
     tokenService.generateAccessToken.mockResolvedValue('mocked-jwt-token');
     tokenService.generateRefreshToken.mockResolvedValue('mocked-jwt-token');
+    tokenService.saveRefreshToken.mockResolvedValue(true);
 
     userModel.findOne.mockResolvedValueOnce({
       ...newUserData,
@@ -163,9 +159,10 @@ describe('AuthService', () => {
       role: UserRole.USER,
     } as any);
 
-    //(jwtService.sign as jest.Mock).mockReturnValue('mocked-jwt-token');
     tokenService.generateAccessToken.mockResolvedValue('mocked-jwt-token');
     tokenService.generateRefreshToken.mockResolvedValue('mocked-jwt-token');
+    tokenService.deleteRefreshToken.mockResolvedValue(true);
+    tokenService.saveRefreshToken.mockResolvedValue(true);
 
     const res = await service.login(newUserData.email, newUserData.password);
 
@@ -243,4 +240,5 @@ describe('AuthService', () => {
       userId: null,
     });
   });
+
 });
