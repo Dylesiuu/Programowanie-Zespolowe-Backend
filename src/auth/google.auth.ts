@@ -7,7 +7,7 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, ObjectId } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
 import { UserRole } from './roles/user-role.enum';
 import { TokenService } from './token.service';
@@ -34,7 +34,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
     done: VerifyCallback,
   ): Promise<any> {
     try {
-      const { name, emails, photos } = profile;
+      const { name, emails } = profile;
 
       const user = await this.userModel.findOne({ email: emails[0].value });
 
@@ -48,6 +48,33 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           await this.tokenService.generateAccessToken(payload);
         const refresh_token =
           await this.tokenService.generateRefreshToken(payload);
+
+        const tokenDeleted = await this.tokenService.deleteRefreshToken(
+          user._id as unknown as ObjectId,
+        );
+
+        if (!tokenDeleted) {
+          done(
+            new InternalServerErrorException(
+              'Error while deleting refresh token',
+            ),
+            false,
+          );
+        }
+
+        const tokenSaved = await this.tokenService.saveRefreshToken(
+          user._id as unknown as ObjectId,
+          refresh_token,
+        );
+
+        if (!tokenSaved) {
+          done(
+            new InternalServerErrorException(
+              'Error while saving refresh token',
+            ),
+            false,
+          );
+        }
         done(null, { access_token, refresh_token, userId: user._id, isFirstLogin: false });
       } else {
         const newUser = await this.userModel.create({
@@ -58,7 +85,14 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           role: UserRole.USER,
         });
 
-        await newUser.save();
+        const userSaved = await newUser.save();
+
+        if (!userSaved) {
+          done(
+            new InternalServerErrorException('Error while saving user'),
+            false,
+          );
+        }
 
         const payload = {
           email: newUser.email,
@@ -69,6 +103,32 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           await this.tokenService.generateAccessToken(payload);
         const refresh_token =
           await this.tokenService.generateRefreshToken(payload);
+
+        const tokenDeleted = await this.tokenService.deleteRefreshToken(
+          newUser._id as unknown as ObjectId,
+        );
+
+        if (!tokenDeleted) {
+          done(
+            new InternalServerErrorException(
+              'Error while deleting refresh token',
+            ),
+            false,
+          );
+        }
+
+        const tokenSaved = await this.tokenService.saveRefreshToken(
+          newUser._id as unknown as ObjectId,
+          refresh_token,
+        );
+        if (!tokenSaved) {
+          done(
+            new InternalServerErrorException(
+              'Error while saving refresh token',
+            ),
+            false,
+          );
+        }
         done(null, { access_token, refresh_token, userId: newUser._id, isFirstLogin: true });
       }
     } catch (error) {
@@ -76,7 +136,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
         return done(new UnauthorizedException('Unauthorized'), false);
       }
       return done(
-        new InternalServerErrorException('Internal server error'),
+        new InternalServerErrorException(error.message),
         false,
       );
     }
