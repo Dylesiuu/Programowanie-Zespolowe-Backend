@@ -175,7 +175,6 @@ describe('UserService', () => {
     );
   });
 
-  it('should add favourite', async () => {
-    
+
 
 });
