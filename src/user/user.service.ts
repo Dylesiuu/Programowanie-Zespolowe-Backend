@@ -126,7 +126,6 @@ async removeTrait(email: string, traits: { tagId: number }[]) {
   for (const trait of traits) {
     const exists = await this.doesTraitExist(email, trait.tagId);
     if (exists) {
-      // Usuwamy trait z tablicy
       user.traits = user.traits.filter(existingTrait => existingTrait.tagId !== trait.tagId);
     }
   }

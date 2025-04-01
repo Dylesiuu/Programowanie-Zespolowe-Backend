@@ -5,21 +5,18 @@ import { User } from '../auth/schemas/user.schema';
 import { Model } from 'mongoose';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
-import { mock } from 'jest-mock-extended';
 
 const mockUser = {
   email: 'Geralt@rivia.com',
   name: 'Geralt',
   lastname: 'z Rivii',
   password: 'Zaraza123',
+  favourites: [1, 2],
   traits: [
     { tagId: 1, priority: 1, name: 'Warrior' },
     { tagId: 2, priority: 2, name: 'Strategist' },
   ],
 };
-
-//const mockUserService = mock<UserService>();
-//const mockUserModel = mock<Model<User>>();
 
 const mockUserModel = {
   findOne: jest.fn().mockImplementation(({ email }) =>
@@ -48,6 +45,12 @@ const mockUserModel = {
       const tagIdToRemove = update.$pull.traits.tagId;
       mockUser.traits = mockUser.traits.filter(trait => trait.tagId !== tagIdToRemove);
     }
+
+    if (update.$set?.favourites) {
+      mockUser.favourites = [...update.$set.favourites];
+    }
+    
+
 
     return Promise.resolve(mockUser);
   }),
@@ -130,9 +133,7 @@ describe('UserService', () => {
 
   it('should add trait', async () => {
     const newTrait = { tagId: 3, priority: 1, name: 'Mage' };
-    console.log('mockUser.traits', mockUser.traits);
     const updatedUser = await service.addTrait('Geralt@rivia.com', [newTrait]);
-    console.log('updatedUser.traits', updatedUser.traits);
     expect(updatedUser.traits).toContainEqual(newTrait);
   
     expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
@@ -147,9 +148,7 @@ describe('UserService', () => {
       { tagId: 3, priority: 1, name: 'Mage' },
       { tagId: 4, priority: 2, name: 'Alchemist' },
     ];
-    console.log('mockUser.traits', mockUser.traits);
     const updatedUser = await service.addTrait('Geralt@rivia.com', newTraits);
-    console.log('updatedUser.traits', updatedUser.traits);
     expect(updatedUser.traits).toContainEqual(newTraits[0]);
     expect(updatedUser.traits).toContainEqual(newTraits[1]);
   
@@ -171,6 +170,35 @@ describe('UserService', () => {
     expect(model.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
       { $set: { traits: expectedTraits } },  
+      { new: true }
+    );
+  });
+
+  it('shuld add favourite', async () => {
+    const newFavourite = { "favourites": [3,4]};
+    const updateUser = await service.addFavourite('Geralt@rivia.com', newFavourite.favourites);
+
+    expect(updateUser.favourites).toContainEqual(3);
+    expect(updateUser.favourites).toContainEqual(4);
+
+    expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { email : 'Geralt@rivia.com'},
+      { $set: { favourites: expect.arrayContaining([...mockUser.favourites, ...newFavourite.favourites]) } },
+      { new: true }
+    );
+  });
+
+  it('should remove favourite', async () => {
+    const newFavourites = [1, 2];
+    const updateUser = await service.removeFavourite('Geralt@rivia.com', newFavourites);
+    expect(updateUser.favourites).not.toContainEqual(1);
+    expect(updateUser.favourites).not.toContainEqual(2);
+
+    expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
+      { email: 'Geralt@rivia.com' },
+      expect.objectContaining({
+        $set: expect.objectContaining({favourites: expect.not.arrayContaining(newFavourites)}),
+      }),
       { new: true }
     );
   });
