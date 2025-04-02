@@ -394,7 +394,7 @@ export class UserController {
     return this.userService.removeFavourite(email, body.favourites);
   }
 
-
+  
   @Patch('addtraits/:email')
   @ApiOperation({
     summary: 'Add trait',

@@ -5,12 +5,6 @@ import { Model, Query } from 'mongoose';
 import { Pet} from './schema/pet.schema';
 import { find, generate } from 'rxjs';
 
-// const mockPetsTable = [
-//   { id: 1, name: "Pomelo",    age: '2 lata'},
-//   { id: 2, name: "Spongebob", age: '4 lata'},
-//   { id: 3, name: "Spongebob", age: '2 lata'},
-// ];
-
 const mockPet = [
   {
     id: 0,
