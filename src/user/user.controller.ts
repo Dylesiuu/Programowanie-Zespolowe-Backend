@@ -3,6 +3,7 @@ import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserService } from './user.service';
 import { User } from '../auth/schemas/user.schema';
 import { ApiTags, ApiBody, ApiResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
+import { Types } from 'mongoose';
 import { error } from 'console';
 
 @ApiTags('UserController')
@@ -26,9 +27,9 @@ export class UserController {
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'Geralt@zrivii.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
@@ -78,9 +79,9 @@ export class UserController {
           lastname: { type: 'string', example: 'zRivi' },
           email: { type: 'string', example: 'mail@gmail.com' },
           password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-          favourites: { type: 'array', example: [1, 2, 3] },
+          favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
           __v: { type: 'number', example: 0 },
-          traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+          traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
         },
       },
     },
@@ -127,9 +128,9 @@ export class UserController {
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'mail@gmail.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
@@ -185,9 +186,9 @@ export class UserController {
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'mail@gmail.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
@@ -294,14 +295,16 @@ export class UserController {
         favourites: {
           type: 'array',
           items: {
-            type: 'number',
+            type: 'ObjectId',
           },
-          example: [1, 2, 3],
+          example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"],
         },
       },
     },
     description: 'Array of favourite items to be added',
   })
+
+  
   @ApiResponse({
     status: 200,
     description: 'Favourite added',
@@ -313,12 +316,13 @@ export class UserController {
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'geralt@wicher.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
+
   @ApiResponse({
     status: 404,
     description: 'User not found',
@@ -331,7 +335,7 @@ export class UserController {
       },
     },
   })
-  async addFavourite(@Param('email') email: string, @Body() body: { favourites: number[] },  ): Promise<User> {
+  async addFavourite(@Param('email') email: string, @Body() body: { favourites: Types.ObjectId[] },  ): Promise<User> {
     return this.userService.addFavourite(email, body.favourites);
   }
 
@@ -353,9 +357,9 @@ export class UserController {
         favourites: {
           type: 'array',
           items: {
-            type: 'number',
+            type: 'ObjectId',
           },
-          example: [1, 2, 3],
+          example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"],
         },
       },
     },
@@ -372,9 +376,9 @@ export class UserController {
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'de@dad.pl' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
@@ -390,7 +394,7 @@ export class UserController {
       },
     },
   })
-  async removeFavourite(@Param('email') email: string, @Body() body: { favourites: number[] }): Promise<User> {
+  async removeFavourite(@Param('email') email: string, @Body() body: { favourites: Types.ObjectId[] }): Promise<User> {
     return this.userService.removeFavourite(email, body.favourites);
   }
 
@@ -413,7 +417,7 @@ export class UserController {
         trait: {
           type: 'object',
           properties: {
-            tagId: { type: 'number', example: 1 },
+            tagId: { type: 'ObjectId', example: "65f8d3a7b9c1d2e0f6a4b5c6" },
             priority: { type: 'number', example: 1 },
             name: { type: 'string', example: 'friendly' },
           },
@@ -433,9 +437,9 @@ export class UserController {
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'geralt@rivia.pl' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
@@ -464,7 +468,7 @@ export class UserController {
     },
   })
   async addTrait(
-    @Param('email') email: string,@Body() Body: { trait: { tagId: number; priority: number; name: string } },): Promise<User> {
+    @Param('email') email: string,@Body() Body: { trait: { tagId: Types.ObjectId; priority: number; name: string } },): Promise<User> {
     return this.userService.addTrait(email, [Body.trait]);
   }
 
@@ -490,10 +494,10 @@ export class UserController {
           items: {
             type: 'object',
             properties: {
-              tagId: { type: 'number', example: 1 },
+              tagId: { type: 'ObjectId', example: "65f8d3a7b9c1d2e0f6a4b5c6" },
             },
           },
-          example: [{ tagId: 1 }],
+          example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6" }],
         },
       },
     },
@@ -510,9 +514,9 @@ export class UserController {
         lastname: { type: 'string', example: 'Skywalker' },
         email: { type: 'string', example: 'lord@vader.star' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
-        favourites: { type: 'array', example: [1, 2, 3] },
+        favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: 1, priority: 1, name: 'Afraid of fire' }] },
+        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
       },
     },
   })
@@ -540,7 +544,7 @@ export class UserController {
       },
     },
   })
-  async removeTrait(@Param('email') email: string, @Body() body: { traits: { tagId: number }[] }): Promise<User> {
+  async removeTrait(@Param('email') email: string, @Body() body: { traits: { tagId: Types.ObjectId }[] }): Promise<User> {
     return this.userService.removeTrait(email, body.traits);
   }
 

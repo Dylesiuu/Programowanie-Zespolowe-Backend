@@ -2,19 +2,25 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { User } from '../auth/schemas/user.schema';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
+
+const Id1 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c6");
+const Id2 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c7");
+const Id3 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a4b7c6");
+const Id4 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a901c6");
+const Id5 = new Types.ObjectId("65f8d3a7b9c1d2e0a6a901c7");
 
 const mockUser = {
   email: 'Geralt@rivia.com',
   name: 'Geralt',
   lastname: 'z Rivii',
   password: 'Zaraza123',
-  favourites: [1, 2],
+  favourites: [Id1, Id2],
   traits: [
-    { tagId: 1, priority: 1, name: 'Warrior' },
-    { tagId: 2, priority: 2, name: 'Strategist' },
+    { tagId: Id1, priority: 1, name: 'Warrior' },
+    { tagId: Id2, priority: 2, name: 'Strategist' },
   ],
 };
 
@@ -29,6 +35,7 @@ const mockUserModel = {
   ),
 
   find: jest.fn().mockResolvedValue([mockUser]),
+  
 
   findOneAndUpdate: jest.fn().mockImplementation((query, update) => {
     if (query.email !== mockUser.email) return Promise.resolve(null);
@@ -122,17 +129,17 @@ describe('UserService', () => {
   });
 
   it('should return true if trait exists', async () => {
-    const exists = await service.doesTraitExist('Geralt@rivia.com', 1);
+    const exists = await service.doesTraitExist('Geralt@rivia.com', Id1);
     expect(exists).toBe(true);
   });
 
   it('should return false if trait does not exist', async () => {
-    const exists = await service.doesTraitExist('Geralt@rivia.com', 99);
+    const exists = await service.doesTraitExist('Geralt@rivia.com', Id5);
     expect(exists).toBe(false);
   });
 
   it('should add trait', async () => {
-    const newTrait = { tagId: 3, priority: 1, name: 'Mage' };
+    const newTrait = { tagId: Id3, priority: 1, name: 'Mage' };
     const updatedUser = await service.addTrait('Geralt@rivia.com', [newTrait]);
     expect(updatedUser.traits).toContainEqual(newTrait);
   
@@ -145,8 +152,8 @@ describe('UserService', () => {
 
   it('should add 2 trait', async () => {
     const newTraits = [
-      { tagId: 3, priority: 1, name: 'Mage' },
-      { tagId: 4, priority: 2, name: 'Alchemist' },
+      { tagId: Id3, priority: 1, name: 'Mage' },
+      { tagId: Id4, priority: 2, name: 'Alchemist' },
     ];
     const updatedUser = await service.addTrait('Geralt@rivia.com', newTraits);
     expect(updatedUser.traits).toContainEqual(newTraits[0]);
@@ -161,12 +168,12 @@ describe('UserService', () => {
 
   it('should remove trait', async () => {
     const expectedTraits = [
-      { tagId: 2, priority: 2, name: 'Strategist' },
-      { tagId: 3, priority: 1, name: 'Mage' },
-      { tagId: 4, priority: 2, name: 'Alchemist' },
+      { tagId: Id2, priority: 2, name: 'Strategist' },
+      { tagId: Id3, priority: 1, name: 'Mage' },
+      { tagId: Id4, priority: 2, name: 'Alchemist' },
     ];
-    const updatedUser = await service.removeTrait('Geralt@rivia.com', [{ tagId: 1 }]); 
-    expect(updatedUser.traits).not.toContainEqual(expect.objectContaining({ tagId: 1 }));
+    const updatedUser = await service.removeTrait('Geralt@rivia.com', [{ tagId: Id1 }]); 
+    expect(updatedUser.traits).not.toContainEqual(expect.objectContaining({ tagId: Id1 }));
     expect(model.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
       { $set: { traits: expectedTraits } },  
@@ -175,11 +182,11 @@ describe('UserService', () => {
   });
 
   it('shuld add favourite', async () => {
-    const newFavourite = { "favourites": [3,4]};
+    const newFavourite = { "favourites": [Id3, Id4]};
     const updateUser = await service.addFavourite('Geralt@rivia.com', newFavourite.favourites);
 
-    expect(updateUser.favourites).toContainEqual(3);
-    expect(updateUser.favourites).toContainEqual(4);
+    expect(updateUser.favourites).toContainEqual(Id3);
+    expect(updateUser.favourites).toContainEqual(Id4);
 
     expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
       { email : 'Geralt@rivia.com'},
@@ -189,10 +196,10 @@ describe('UserService', () => {
   });
 
   it('should remove favourite', async () => {
-    const newFavourites = [1, 2];
+    const newFavourites = [Id3, Id4];
     const updateUser = await service.removeFavourite('Geralt@rivia.com', newFavourites);
-    expect(updateUser.favourites).not.toContainEqual(1);
-    expect(updateUser.favourites).not.toContainEqual(2);
+    expect(updateUser.favourites).not.toContainEqual(Id3);
+    expect(updateUser.favourites).not.toContainEqual(Id4);
 
     expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
@@ -204,3 +211,5 @@ describe('UserService', () => {
   });
 
 });
+
+

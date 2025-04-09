@@ -1,10 +1,13 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, Types } from 'mongoose';
 import { User, UserDocument } from '../auth/schemas/user.schema';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
 import e from 'express';
+
+
+
 
 @Injectable()
 export class UserService {
@@ -44,13 +47,16 @@ export class UserService {
     );
   }
 
-  async doesFavouriteExist(email: string, favouriteId: number): Promise<boolean> {
+  async doesFavouriteExist(email: string, favouriteId: Types.ObjectId): Promise<boolean> {
+    if (!Types.ObjectId.isValid(favouriteId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
     return user.favourites.includes(favouriteId);
   }
   
-  async addFavourite(email: string, favourites: number[]) {
+  async addFavourite(email: string, favourites: Types.ObjectId[]) {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
     user.favourites = user.favourites || [];
@@ -67,7 +73,7 @@ export class UserService {
     );
   }
 
-  async removeFavourite(email: string, favourites: number[]) {
+  async removeFavourite(email: string, favourites: Types.ObjectId[]) {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
     user.favourites = user.favourites || [];
@@ -87,7 +93,12 @@ export class UserService {
   }
 
 
-  async doesTraitExist(email: string, tagId: number): Promise<boolean> {
+
+
+  async doesTraitExist(email: string, tagId: Types.ObjectId): Promise<boolean> {
+    if (!Types.ObjectId.isValid(tagId)) {
+      throw new BadRequestException('Invalid ID format');
+    }
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
 
@@ -95,17 +106,19 @@ export class UserService {
       return false;
     }
 
-    return user.traits.some((trait) => trait.tagId === Number(tagId));
+    return user.traits.some((trait) => trait.tagId == tagId);
   }
 
+  
 
 
-  async addTrait(email: string, traits:{ tagId: number; priority: number; name: string }[] ) {
+
+  async addTrait(email: string, traits:{ tagId: Types.ObjectId; priority: number; name: string }[] ) {
     const user = await this.userModel.findOne({ email });
   if (!user) throw new NotFoundException('User not found');
   user.traits = user.traits || [];
 
-  const newTraits = traits.filter(trait => !user.traits.some(existingTrait => existingTrait.tagId === trait.tagId));
+  const newTraits = traits.filter(trait => !user.traits.some(existingTrait => existingTrait.tagId == trait.tagId));
 
   if (newTraits.length > 0) {
     user.traits = [...user.traits, ...newTraits];
@@ -118,7 +131,7 @@ export class UserService {
   );
 }
 
-async removeTrait(email: string, traits: { tagId: number }[]) {
+async removeTrait(email: string, traits: { tagId: Types.ObjectId }[]) {
   const user = await this.userModel.findOne({ email });
   if (!user) throw new NotFoundException('User not found');
   user.traits = user.traits || [];
