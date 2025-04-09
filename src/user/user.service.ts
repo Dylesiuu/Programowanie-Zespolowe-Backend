@@ -1,10 +1,9 @@
 import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, Types } from 'mongoose';
-import { User, UserDocument } from '../auth/schemas/user.schema';
+import { Model, Schema as MongooseSchema } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
-import e from 'express';
 
 
 
@@ -47,16 +46,13 @@ export class UserService {
     );
   }
 
-  async doesFavouriteExist(email: string, favouriteId: Types.ObjectId): Promise<boolean> {
-    if (!Types.ObjectId.isValid(favouriteId)) {
-      throw new BadRequestException('Invalid ID format');
-    }
+  async doesFavouriteExist(email: string, favouriteId: MongooseSchema.Types.ObjectId): Promise<boolean> {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
     return user.favourites.includes(favouriteId);
   }
   
-  async addFavourite(email: string, favourites: Types.ObjectId[]) {
+  async addFavourite(email: string, favourites: MongooseSchema.Types.ObjectId[]) {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
     user.favourites = user.favourites || [];
@@ -73,7 +69,7 @@ export class UserService {
     );
   }
 
-  async removeFavourite(email: string, favourites: Types.ObjectId[]) {
+  async removeFavourite(email: string, favourites: MongooseSchema.Types.ObjectId[]) {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
     user.favourites = user.favourites || [];
@@ -95,10 +91,7 @@ export class UserService {
 
 
 
-  async doesTraitExist(email: string, tagId: Types.ObjectId): Promise<boolean> {
-    if (!Types.ObjectId.isValid(tagId)) {
-      throw new BadRequestException('Invalid ID format');
-    }
+  async doesTraitExist(email: string, tagId: MongooseSchema.Types.ObjectId): Promise<boolean> {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
 
@@ -113,7 +106,7 @@ export class UserService {
 
 
 
-  async addTrait(email: string, traits: Types.ObjectId[] ) {
+  async addTrait(email: string, traits: MongooseSchema.Types.ObjectId[] ) {
     const user = await this.userModel.findOne({ email });
   if (!user) throw new NotFoundException('User not found');
   user.traits = user.traits || [];
@@ -131,7 +124,7 @@ export class UserService {
   );
 }
 
-async removeTrait(email: string, traits: Types.ObjectId[]) {
+async removeTrait(email: string, traits: MongooseSchema.Types.ObjectId[]) {
   const user = await this.userModel.findOne({ email });
   if (!user) throw new NotFoundException('User not found');
   user.traits = user.traits || [];

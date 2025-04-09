@@ -1,6 +1,5 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { error, table } from 'console';
 import { Model } from 'mongoose';
 import { Pet } from './schema/pet.schema';
 

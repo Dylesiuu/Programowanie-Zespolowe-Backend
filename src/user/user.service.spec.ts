@@ -2,15 +2,15 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
 import { User } from '../auth/schemas/user.schema';
-import { Model, Types } from 'mongoose';
+import { Model, Schema as MongooseSchema } from 'mongoose';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
 
-const Id1 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c6");
-const Id2 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c7");
-const Id3 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a4b7c6");
-const Id4 = new Types.ObjectId("65f8d3a7b9c1d2e0f6a901c6");
-const Id5 = new Types.ObjectId("65f8d3a7b9c1d2e0a6a901c7");
+const Id1 = new MongooseSchema.Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c6");
+const Id2 = new MongooseSchema.Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c7");
+const Id3 = new MongooseSchema.Types.ObjectId("65f8d3a7b9c1d2e0f6a4b7c6");
+const Id4 = new MongooseSchema.Types.ObjectId("65f8d3a7b9c1d2e0f6a901c6");
+const Id5 = new MongooseSchema.Types.ObjectId("65f8d3a7b9c1d2e0a6a901c7");
 
 const mockUser = {
   email: 'Geralt@rivia.com',

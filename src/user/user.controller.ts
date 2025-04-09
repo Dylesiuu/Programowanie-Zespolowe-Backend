@@ -1,9 +1,9 @@
 import { Controller, Get, Delete, NotFoundException, Param, Patch, Body , UsePipes, ValidationPipe, ParseIntPipe, } from '@nestjs/common';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { UserService } from './user.service';
-import { User } from '../auth/schemas/user.schema';
+import { User } from './schemas/user.schema';
 import { ApiTags, ApiBody, ApiResponse, ApiOperation, ApiParam } from '@nestjs/swagger';
-import { Types } from 'mongoose';
+import { Schema as MongooseSchema } from 'mongoose';
 import { error } from 'console';
 
 @ApiTags('UserController')
@@ -28,6 +28,7 @@ export class UserController {
         email: { type: 'string', example: 'Geralt@zrivii.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
@@ -71,8 +72,7 @@ export class UserController {
     status: 200,
     description: 'All users found',
     schema: {
-      type: 'array',
-      items: {
+      type: 'object',
         properties: {
           _id: { type: 'string', example: '1d12131d' },
           name: { type: 'string', example: 'Geralt' },
@@ -80,10 +80,10 @@ export class UserController {
           email: { type: 'string', example: 'mail@gmail.com' },
           password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
           favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+          role: { type: 'string', example: 'USER' },
           __v: { type: 'number', example: 0 },
           traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
         },
-      },
     },
   })
   async getAllUsers(): Promise<User[]> {
@@ -123,12 +123,13 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        _id: { type: 'string', example: '1d12131d' },
+        _id: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         name: { type: 'string', example: 'Geralt' },
         lastname: { type: 'string', example: 'zRivi' },
         email: { type: 'string', example: 'mail@gmail.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
@@ -149,9 +150,6 @@ export class UserController {
 
   async updateUserName(@Param('email') email: string, @Body('name') name: string): Promise<User> {
     const user = this.userService.updateUserName(email, name);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    } 
     return user;
   }
 
@@ -187,6 +185,7 @@ export class UserController {
         email: { type: 'string', example: 'mail@gmail.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
@@ -207,9 +206,6 @@ export class UserController {
   @Patch('update-lastname/:email')
   async updateUserLastname(@Param('email') email: string, @Body('lastname') lastname: string): Promise<User> {
     const user = await this.userService.updateUserLastname(email, lastname);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    } 
     return user;
   }
 
@@ -246,6 +242,8 @@ export class UserController {
       type: 'object',
       properties: {
         message: { type: 'string', example: 'User not found' },
+        error: { type: 'string', example: 'Not Found' },
+        statusCode: { type: 'number', example: 404 },
       },
     },
   })
@@ -317,6 +315,7 @@ export class UserController {
         email: { type: 'string', example: 'geralt@wicher.com' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
@@ -335,7 +334,7 @@ export class UserController {
       },
     },
   })
-  async addFavourite(@Param('email') email: string, @Body() body: { favourites: Types.ObjectId[] },  ): Promise<User> {
+  async addFavourite(@Param('email') email: string, @Body() body: { favourites: MongooseSchema.Types.ObjectId[] },  ): Promise<User> {
     return this.userService.addFavourite(email, body.favourites);
   }
 
@@ -377,6 +376,7 @@ export class UserController {
         email: { type: 'string', example: 'de@dad.pl' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
@@ -394,7 +394,7 @@ export class UserController {
       },
     },
   })
-  async removeFavourite(@Param('email') email: string, @Body() body: { favourites: Types.ObjectId[] }): Promise<User> {
+  async removeFavourite(@Param('email') email: string, @Body() body: { favourites: MongooseSchema.Types.ObjectId[] }): Promise<User> {
     return this.userService.removeFavourite(email, body.favourites);
   }
 
@@ -412,17 +412,16 @@ export class UserController {
   })
   @ApiBody({
     schema: {
-      type: 'object',
-      properties: {
-        traits: {
-          type: 'array',
-          items: {
-            type: 'ObjectId',
-             example: "65f8d3a7b9c1d2e0f6a4b5c6" 
+          type: 'object',
+          properties: {
+            trait: {
+              type: 'array',
+              items: {
+                type: 'ObjectId',
+              },
+              example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"],
+            },
           },
-          example: ["65f8d3a7b9c1d2e0f6a4b5c6"],
-        },
-      },
     },
     description: 'Trait to be added',
   })
@@ -438,20 +437,9 @@ export class UserController {
         email: { type: 'string', example: 'geralt@rivia.pl' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
-      },
-    },
-  })
-  @ApiResponse({
-    status: 400,
-    description: 'Trait already exists',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Trait already exists' },
-        error: { type: 'string', example: 'Bad Request' },
-        statusCode: { type: 'number', example: 400 },
       },
     },
   })
@@ -468,7 +456,7 @@ export class UserController {
     },
   })
   async addTrait(
-    @Param('email') email: string,@Body() Body: { trait: Types.ObjectId[] },): Promise<User> {
+    @Param('email') email: string,@Body() Body: { trait: MongooseSchema.Types.ObjectId[] },): Promise<User> {
     return this.userService.addTrait(email, Body.trait);
   }
 
@@ -489,16 +477,15 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        traits: {
+        trait: {
           type: 'array',
           items: {
             type: 'ObjectId',
-             example: "65f8d3a7b9c1d2e0f6a4b5c6" 
           },
-          example: ["65f8d3a7b9c1d2e0f6a4b5c6"],
+          example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"],
         },
       },
-    },
+},
     description: 'Array of traits to be removed',
   })
   @ApiResponse({
@@ -513,6 +500,7 @@ export class UserController {
         email: { type: 'string', example: 'lord@vader.star' },
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
+        role: { type: 'string', example: 'USER' },
         __v: { type: 'number', example: 0 },
         traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
@@ -530,20 +518,8 @@ export class UserController {
       },
     },
   })
-  @ApiResponse({
-    status: 400,
-    description: 'Trait does not exist',
-    schema: {
-      type: 'object',
-      properties: {
-        message: { type: 'string', example: 'Trait not found' },
-        error: { type: 'string', example: 'Bad Request' },
-        statusCode: { type: 'number', example: 400 },
-      },
-    },
-  })
-  async removeTrait(@Param('email') email: string, @Body() body: { traits: Types.ObjectId[] }): Promise<User> {
-    return this.userService.removeTrait(email, body.traits);
+  async removeTrait(@Param('email') email: string, @Body() body: { trait: MongooseSchema.Types.ObjectId[] }): Promise<User> {
+    return this.userService.removeTrait(email, body.trait);
   }
 
 }

@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { ScrollingService } from './scrolling.service';
 import { getModelToken } from '@nestjs/mongoose';
-import { Model, Query } from 'mongoose';
-import { Pet} from './schema/pet.schema';
-import { find, generate } from 'rxjs';
+import { Model } from 'mongoose';
+import { Pet } from './schema/pet.schema';
 
 const mockPet = [
   {
