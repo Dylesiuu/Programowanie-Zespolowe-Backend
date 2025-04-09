@@ -1,9 +1,11 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { UserService } from './user.service';
 import { getModelToken } from '@nestjs/mongoose';
-import { User } from '../auth/schemas/user.schema';
+import { User } from './schemas/user.schema';
 import { Model, Schema as MongooseSchema } from 'mongoose';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { ObjectId } from 'mongodb';
+import { mock } from 'jest-mock-extended';
 import * as bcrypt from 'bcrypt';
 
 const Id1 = new MongooseSchema.Types.ObjectId("65f8d3a7b9c1d2e0f6a4b5c6");
@@ -194,6 +196,34 @@ describe('UserService', () => {
       { new: true }
     );
   });
+
+  // it('should update user role', async () => {
+  //   model.findOneAndUpdate.mockResolvedValue({
+  //     ...mockUser,
+  //     role: 'user',
+  //   });
+  //   const updatedUser = await service.updateUserRole(
+  //     new ObjectId('507f191e810c19729de860ea'),
+  //     'admin',
+  //   );
+  //   expect(updatedUser).toEqual({ message: 'User role updated successfully' });
+  // });
+
+  // it('should return message if user not found', async () => {
+  //   model.findOneAndUpdate.mockResolvedValue(null);
+  //   const result = await service.updateUserRole(
+  //     new ObjectId('507f191e810c19729de860ea'),
+  //     'admin',
+  //   );
+  //   expect(result).toEqual({ message: 'User not found' });
+  // });
+  // it('should return message if role is invalid', async () => {
+  //   const result = await service.updateUserRole(
+  //     new ObjectId('507f191e810c19729de860ea'),
+  //     'invalidRole',
+  //   );
+  //   expect(result).toEqual({ message: 'Invalid role' });
+  // });
 
 });
 

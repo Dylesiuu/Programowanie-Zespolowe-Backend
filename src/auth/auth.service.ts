@@ -2,9 +2,10 @@ import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { Model } from 'mongoose';
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
+import { UserRole } from './roles/user-role.enum';
 
 @Injectable()
 export class AuthService {
@@ -33,11 +34,12 @@ export class AuthService {
       lastname,
       email,
       password: hashedpassword,
+      role: UserRole.USER,
     });
 
     await user.save();
 
-    const payload = { email: user.email, sub: user._id };
+    const payload = { email: user.email, sub: user._id, role: user.role };
     const token = this.jwtService.sign(payload);
 
     return { message: 'User registered successfully', token, userId: user._id };
@@ -53,7 +55,11 @@ export class AuthService {
     const valid = await bcrypt.compare(password, userExist.password);
 
     if (valid) {
-      const payload = { email: userExist.email, sub: userExist._id };
+      const payload = {
+        email: userExist.email,
+        sub: userExist._id,
+        role: userExist.role,
+      };
       const token = this.jwtService.sign(payload);
       return {
         message: 'User logged successfully',

@@ -143,4 +143,26 @@ async removeTrait(email: string, traits: MongooseSchema.Types.ObjectId[]) {
   );
 }
 
+async updateUserRole(
+  id: MongooseSchema.Types.ObjectId,
+  newRole: string,
+): Promise<{ message: string }> {
+  const validRoles = ['admin', 'user', 'employee'];
+
+  if (!validRoles.includes(newRole)) {
+    return { message: 'Invalid role' };
+  }
+  const user = await this.userModel.findOneAndUpdate(
+    { _id: id },
+    { role: newRole },
+    { new: true },
+  );
+
+  if (!user) {
+    return { message: 'User not found' };
+  }
+
+  return { message: 'User role updated successfully' };
+}
+
 }

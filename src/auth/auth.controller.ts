@@ -20,12 +20,14 @@ import {
   ApiTags,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import { Public } from './decorators/public.decorator';
 
 @ApiTags('AuthenticationController')
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('register')
   @ApiOperation({
     summary: 'Register a new user',
@@ -47,6 +49,7 @@ export class AuthController {
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE1MTYyNDI2MjIsInJvbGUiOiJ1c2VyIn0.5mhBHqs5_DTLdINd9p5m7ZJ6XD0Xc55kIaCRY5r6HRA',
         },
         userId: { type: 'number', example: 1 },
+        statusCode: { type: 'number', example: 201 },
       },
     },
   })
@@ -72,9 +75,10 @@ export class AuthController {
       throw new ConflictException(res.message);
     }
 
-    return res;
+    return { ...res, statusCode: 201 };
   }
 
+  @Public()
   @Post('login')
   @ApiOperation({
     summary: 'Login a user',
@@ -96,6 +100,7 @@ export class AuthController {
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvcmRhbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MTUxNjI0MjYyMiwicm9sZSI6InVzZXIifQ.5mhBHqs5_DTLdINd9p5m7ZJ6XD0Xc55kIaCRY5r6HRA',
         },
         userId: { type: 'number', example: 1 },
+        statusCode: { type: 'number', example: 200 },
       },
     },
   })
@@ -144,9 +149,10 @@ export class AuthController {
       throw new ConflictException(res.message);
     }
 
-    return res;
+    return { ...res, statusCode: 200 };
   }
 
+  @Public()
   @Get('google')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
@@ -159,6 +165,7 @@ export class AuthController {
   })
   async googleAuth() {}
 
+  @Public()
   @Get('google/callback')
   @UseGuards(AuthGuard('google'))
   @ApiOperation({
@@ -178,6 +185,7 @@ export class AuthController {
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvcmRhbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MTUxNjI0MjYyMiwicm9sZSI6InVzZXIifQ.5mhBHqs5_DTLdINd9p5m7ZJ6XD0Xc55kIaCRY5r6HRA',
         },
         userId: { type: 'number', example: 1 },
+        statusCode: { type: 'number', example: 200 },
       },
     },
   })
@@ -195,6 +203,11 @@ export class AuthController {
     const user = req.user;
     const token = user.token;
     const userId = user.userId;
-    return { message: 'User logged successfully', token, userId };
+    return {
+      message: 'User logged successfully',
+      token,
+      userId,
+      statusCode: 200,
+    };
   }
 }

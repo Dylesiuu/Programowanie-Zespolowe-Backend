@@ -5,10 +5,11 @@ import { CreateUserDto } from './dto/create-user.dto';
 import { validate } from 'class-validator';
 import { plainToInstance } from 'class-transformer';
 import { getModelToken } from '@nestjs/mongoose';
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 import { Model } from 'mongoose';
 import { JwtService } from '@nestjs/jwt';
 import { mock } from 'jest-mock-extended';
+import { UserRole } from './roles/user-role.enum';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -47,6 +48,7 @@ describe('AuthService', () => {
       lastname: 'lastName',
       email: 'email@gmail.com',
       password: 'haslO2452345923582fnw823#',
+      role: UserRole.USER,
     };
 
     const newUserDataDto = plainToInstance(CreateUserDto, newUserData);
@@ -76,11 +78,13 @@ describe('AuthService', () => {
       lastname: newUserData.lastname,
       email: newUserData.email,
       password: expect.not.stringMatching(newUserData.password),
+      role: UserRole.USER,
     });
 
     expect(jwtService.sign).toHaveBeenCalledWith({
       email: newUserData.email,
       sub: '123',
+      role: UserRole.USER,
     });
 
     expect(res).toEqual({

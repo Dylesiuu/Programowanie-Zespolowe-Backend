@@ -3,7 +3,7 @@ import { GoogleAuth } from './google.auth';
 import { ConfigService } from '@nestjs/config';
 import { getModelToken } from '@nestjs/mongoose';
 import { JwtService } from '@nestjs/jwt';
-import { User, UserDocument } from './schemas/user.schema';
+import { User, UserDocument } from '../user/schemas/user.schema';
 import { Model } from 'mongoose';
 import { InternalServerErrorException } from '@nestjs/common';
 import { mock } from 'jest-mock-extended';
