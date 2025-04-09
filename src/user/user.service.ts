@@ -106,19 +106,19 @@ export class UserService {
       return false;
     }
 
-    return user.traits.some((trait) => trait.tagId == tagId);
+    return user.traits.some((trait) => trait == tagId);
   }
 
   
 
 
 
-  async addTrait(email: string, traits:{ tagId: Types.ObjectId; priority: number; name: string }[] ) {
+  async addTrait(email: string, traits: Types.ObjectId[] ) {
     const user = await this.userModel.findOne({ email });
   if (!user) throw new NotFoundException('User not found');
   user.traits = user.traits || [];
 
-  const newTraits = traits.filter(trait => !user.traits.some(existingTrait => existingTrait.tagId == trait.tagId));
+  const newTraits = traits.filter(trait => !user.traits.some(existingTrait => existingTrait == trait));
 
   if (newTraits.length > 0) {
     user.traits = [...user.traits, ...newTraits];
@@ -131,15 +131,15 @@ export class UserService {
   );
 }
 
-async removeTrait(email: string, traits: { tagId: Types.ObjectId }[]) {
+async removeTrait(email: string, traits: Types.ObjectId[]) {
   const user = await this.userModel.findOne({ email });
   if (!user) throw new NotFoundException('User not found');
   user.traits = user.traits || [];
 
   for (const trait of traits) {
-    const exists = await this.doesTraitExist(email, trait.tagId);
+    const exists = await this.doesTraitExist(email, trait);
     if (exists) {
-      user.traits = user.traits.filter(existingTrait => existingTrait.tagId !== trait.tagId);
+      user.traits = user.traits.filter(existingTrait => existingTrait !== trait);
     }
   }
 

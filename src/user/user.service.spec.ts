@@ -18,10 +18,7 @@ const mockUser = {
   lastname: 'z Rivii',
   password: 'Zaraza123',
   favourites: [Id1, Id2],
-  traits: [
-    { tagId: Id1, priority: 1, name: 'Warrior' },
-    { tagId: Id2, priority: 2, name: 'Strategist' },
-  ],
+  traits: [Id1, Id2],
 };
 
 const mockUserModel = {
@@ -47,10 +44,6 @@ const mockUserModel = {
 
     if (update.$set?.traits) {
       mockUser.traits = [...update.$set.traits];
-    }
-    if (update.$pull?.traits) {
-      const tagIdToRemove = update.$pull.traits.tagId;
-      mockUser.traits = mockUser.traits.filter(trait => trait.tagId !== tagIdToRemove);
     }
 
     if (update.$set?.favourites) {
@@ -139,41 +132,33 @@ describe('UserService', () => {
   });
 
   it('should add trait', async () => {
-    const newTrait = { tagId: Id3, priority: 1, name: 'Mage' };
-    const updatedUser = await service.addTrait('Geralt@rivia.com', [newTrait]);
-    expect(updatedUser.traits).toContainEqual(newTrait);
+    const newTrait = [Id3];
+    const updatedUser = await service.addTrait('Geralt@rivia.com', [Id3]);
+    expect(updatedUser.traits).toContainEqual(Id3);
   
     expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
-      { $set: { traits: [...mockUser.traits.filter(t => t.tagId !== newTrait.tagId), newTrait] } },
+      { $set: { traits: expect.arrayContaining([...mockUser.traits, ...newTrait]) } },
       { new: true }
     );
   });
 
   it('should add 2 trait', async () => {
-    const newTraits = [
-      { tagId: Id3, priority: 1, name: 'Mage' },
-      { tagId: Id4, priority: 2, name: 'Alchemist' },
-    ];
-    const updatedUser = await service.addTrait('Geralt@rivia.com', newTraits);
-    expect(updatedUser.traits).toContainEqual(newTraits[0]);
-    expect(updatedUser.traits).toContainEqual(newTraits[1]);
+    const updatedUser = await service.addTrait('Geralt@rivia.com', [Id3, Id4]);
+    expect(updatedUser.traits).toContainEqual(Id3);
+    expect(updatedUser.traits).toContainEqual(Id4);
   
     expect(mockUserModel.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
-      { $set: { traits: expect.arrayContaining([...mockUser.traits, ...newTraits]) } },
+      { $set: { traits: expect.arrayContaining([...mockUser.traits, ...[Id3, Id4]]) } },
       { new: true }
     );
   });
 
   it('should remove trait', async () => {
-    const expectedTraits = [
-      { tagId: Id2, priority: 2, name: 'Strategist' },
-      { tagId: Id3, priority: 1, name: 'Mage' },
-      { tagId: Id4, priority: 2, name: 'Alchemist' },
-    ];
-    const updatedUser = await service.removeTrait('Geralt@rivia.com', [{ tagId: Id1 }]); 
-    expect(updatedUser.traits).not.toContainEqual(expect.objectContaining({ tagId: Id1 }));
+    const expectedTraits = [Id2, Id3, Id4];
+    const updatedUser = await service.removeTrait('Geralt@rivia.com', [Id1 ]); 
+    expect(updatedUser.traits).not.toContainEqual(expect.objectContaining(Id1 ));
     expect(model.findOneAndUpdate).toHaveBeenCalledWith(
       { email: 'Geralt@rivia.com' },
       { $set: { traits: expectedTraits } },  

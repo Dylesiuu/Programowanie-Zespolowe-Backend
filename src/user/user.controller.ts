@@ -29,7 +29,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -81,7 +81,7 @@ export class UserController {
           password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
           favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
           __v: { type: 'number', example: 0 },
-          traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+          traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
         },
       },
     },
@@ -130,7 +130,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -188,7 +188,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -318,7 +318,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -378,7 +378,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -414,13 +414,13 @@ export class UserController {
     schema: {
       type: 'object',
       properties: {
-        trait: {
-          type: 'object',
-          properties: {
-            tagId: { type: 'ObjectId', example: "65f8d3a7b9c1d2e0f6a4b5c6" },
-            priority: { type: 'number', example: 1 },
-            name: { type: 'string', example: 'friendly' },
+        traits: {
+          type: 'array',
+          items: {
+            type: 'ObjectId',
+             example: "65f8d3a7b9c1d2e0f6a4b5c6" 
           },
+          example: ["65f8d3a7b9c1d2e0f6a4b5c6"],
         },
       },
     },
@@ -439,7 +439,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -468,8 +468,8 @@ export class UserController {
     },
   })
   async addTrait(
-    @Param('email') email: string,@Body() Body: { trait: { tagId: Types.ObjectId; priority: number; name: string } },): Promise<User> {
-    return this.userService.addTrait(email, [Body.trait]);
+    @Param('email') email: string,@Body() Body: { trait: Types.ObjectId[] },): Promise<User> {
+    return this.userService.addTrait(email, Body.trait);
   }
 
 
@@ -492,12 +492,10 @@ export class UserController {
         traits: {
           type: 'array',
           items: {
-            type: 'object',
-            properties: {
-              tagId: { type: 'ObjectId', example: "65f8d3a7b9c1d2e0f6a4b5c6" },
-            },
+            type: 'ObjectId',
+             example: "65f8d3a7b9c1d2e0f6a4b5c6" 
           },
-          example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6" }],
+          example: ["65f8d3a7b9c1d2e0f6a4b5c6"],
         },
       },
     },
@@ -516,7 +514,7 @@ export class UserController {
         password: { type: 'string', example: '213jyg1h2j31j2g31kj23' },
         favourites: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6", "65f8d3a7b9c1d2e0f6a4b5c7", "65f8d3a7b9c1d2e0f6a4b7c6"] },
         __v: { type: 'number', example: 0 },
-        traits: { type: 'array', example: [{ tagId: "65f8d3a7b9c1d2e0f6a4b5c6", priority: 1, name: 'friendly' }] },
+        traits: { type: 'array', example: ["65f8d3a7b9c1d2e0f6a4b5c6"] },
       },
     },
   })
@@ -544,7 +542,7 @@ export class UserController {
       },
     },
   })
-  async removeTrait(@Param('email') email: string, @Body() body: { traits: { tagId: Types.ObjectId }[] }): Promise<User> {
+  async removeTrait(@Param('email') email: string, @Body() body: { traits: Types.ObjectId[] }): Promise<User> {
     return this.userService.removeTrait(email, body.traits);
   }
 
