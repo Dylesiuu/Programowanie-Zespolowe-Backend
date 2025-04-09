@@ -18,7 +18,7 @@ export class User {
   password: string;
 
   @Prop({ default: [] })
-  favourites: number[];
+  favourites: MongooseSchema.Types.ObjectId[];
 
   @Prop({ default: UserRole.USER })
   role: UserRole;

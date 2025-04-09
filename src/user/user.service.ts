@@ -1,10 +1,12 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
-import { User, UserDocument } from '../user/schemas/user.schema';
+import { Model, Schema as MongooseSchema } from 'mongoose';
+import { User, UserDocument } from './schemas/user.schema';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import * as bcrypt from 'bcrypt';
-import { ObjectId } from 'mongodb';
+
+
+
 
 @Injectable()
 export class UserService {
@@ -19,64 +21,77 @@ export class UserService {
   }
 
   async updateUserName(email: string, newName: string): Promise<User | null> {
-    return this.userModel.findOneAndUpdate(
-      { email },
-      { name: newName },
-      { new: true },
-    );
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.name = newName;
+    return await user.save();
   }
 
-  async updateUserLastname(
-    email: string,
-    newLastname: string,
-  ): Promise<User | null> {
-    return this.userModel.findOneAndUpdate(
-      { email },
-      { lastname: newLastname },
-      { new: true },
-    );
+  async updateUserLastname(email: string, newLastname: string): Promise<User | null> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.lastname = newLastname;
+    return await user.save();
   }
 
-  async updateUserPassword(
-    email: string,
-    updatePasswordDto: UpdatePasswordDto,
-  ): Promise<User | null> {
+  async updateUserPassword(email: string, updatePasswordDto: UpdatePasswordDto): Promise<User | null> {
     const { password } = updatePasswordDto;
 
     const hashedPassword = await bcrypt.hash(password, 12);
 
     return this.userModel.findOneAndUpdate(
       { email },
-      { password: hashedPassword },
-      { new: true },
+      { password: hashedPassword }, 
+      { new: true }
     );
   }
 
-  async updateUserRole(
-    id: ObjectId,
-    newRole: string,
-  ): Promise<{ message: string }> {
-    const validRoles = ['admin', 'user', 'employee'];
-
-    if (!validRoles.includes(newRole)) {
-      return { message: 'Invalid role' };
+  async doesFavouriteExist(email: string, favouriteId: MongooseSchema.Types.ObjectId): Promise<boolean> {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    return user.favourites.includes(favouriteId);
+  }
+  
+  async addFavourite(email: string, favourites: MongooseSchema.Types.ObjectId[]) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.favourites = user.favourites || [];
+    const newFavourites = favourites.filter(favouriteId => !user.favourites.includes(favouriteId));
+  
+    if (newFavourites.length > 0) {
+      user.favourites = [...user.favourites, ...newFavourites];
     }
-    const user = await this.userModel.findOneAndUpdate(
-      { _id: id },
-      { role: newRole },
-      { new: true },
+  
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { $set: { favourites: user.favourites } },
+      { new: true }
     );
-
-    if (!user) {
-      return { message: 'User not found' };
-    }
-
-    return { message: 'User role updated successfully' };
   }
 
-  //Fix later, commented out due to bugs
-  /*
-  async doesTraitExist(email: string, tagId: ObjectId): Promise<boolean> {
+  async removeFavourite(email: string, favourites: MongooseSchema.Types.ObjectId[]) {
+    const user = await this.userModel.findOne({ email });
+    if (!user) throw new NotFoundException('User not found');
+    user.favourites = user.favourites || [];
+
+    for (const favouriteId of favourites) {
+      const exists = await this.doesFavouriteExist(email, favouriteId);
+      if (exists) {
+        user.favourites = user.favourites.filter(existingFavourite => existingFavourite !== favouriteId);
+      }
+    }
+
+    return this.userModel.findOneAndUpdate(
+      { email },
+      { $set: { favourites: user.favourites } },
+      { new: true }
+    );
+  }
+
+
+
+
+  async doesTraitExist(email: string, tagId: MongooseSchema.Types.ObjectId): Promise<boolean> {
     const user = await this.userModel.findOne({ email });
     if (!user) throw new NotFoundException('User not found');
 
@@ -84,41 +99,70 @@ export class UserService {
       return false;
     }
 
-    return user.traits.some(trait => );
+    return user.traits.some((trait) => trait == tagId);
   }
 
-  async addTrait(
-    email: string,
-    trait: { tagId: number; priority: number; name: string },
-  ) {
+  
+
+
+
+  async addTrait(email: string, traits: MongooseSchema.Types.ObjectId[] ) {
     const user = await this.userModel.findOne({ email });
-    if (!user) throw new NotFoundException('User not found');
+  if (!user) throw new NotFoundException('User not found');
+  user.traits = user.traits || [];
 
-    user.traits = user.traits || [];
+  const newTraits = traits.filter(trait => !user.traits.some(existingTrait => existingTrait == trait));
 
-    const exists = await this.doesTraitExist(email, trait.tagId);
-    if (exists) throw new BadRequestException('Trait already exists');
-
-    user.traits.push(trait);
-    return this.userModel
-      .findOneAndUpdate({ email }, { $push: { traits: trait } }, { new: true });
+  if (newTraits.length > 0) {
+    user.traits = [...user.traits, ...newTraits];
   }
 
-  async removeTrait(email: string, tagId: number) {
-    const user = await this.userModel.findOne({ email });
-    if (!user) throw new NotFoundException('User not found');
+  return this.userModel.findOneAndUpdate(
+    { email },
+    { $set: { traits: user.traits } },
+    { new: true }
+  );
+}
 
-    user.traits = user.traits || [];
+async removeTrait(email: string, traits: MongooseSchema.Types.ObjectId[]) {
+  const user = await this.userModel.findOne({ email });
+  if (!user) throw new NotFoundException('User not found');
+  user.traits = user.traits || [];
 
-    const exists = await this.doesTraitExist(email, tagId);
-    if (!exists) throw new BadRequestException('Trait not found');
+  for (const trait of traits) {
+    const exists = await this.doesTraitExist(email, trait);
+    if (exists) {
+      user.traits = user.traits.filter(existingTrait => existingTrait !== trait);
+    }
+  }
 
-    user.traits = user.traits.filter((trait) => trait.tagId !== tagId);
-    return this.userModel
-      .findOneAndUpdate(
-        { email },
-        { $pull: { traits: { tagId } } },
-        { new: true },
-      );
-  }*/
+  return this.userModel.findOneAndUpdate(
+    { email },
+    { $set: { traits: user.traits } },
+    { new: true }
+  );
+}
+
+async updateUserRole(
+  id: MongooseSchema.Types.ObjectId,
+  newRole: string,
+): Promise<{ message: string }> {
+  const validRoles = ['admin', 'user', 'employee'];
+
+  if (!validRoles.includes(newRole)) {
+    return { message: 'Invalid role' };
+  }
+  const user = await this.userModel.findOneAndUpdate(
+    { _id: id },
+    { role: newRole },
+    { new: true },
+  );
+
+  if (!user) {
+    return { message: 'User not found' };
+  }
+
+  return { message: 'User role updated successfully' };
+}
+
 }
