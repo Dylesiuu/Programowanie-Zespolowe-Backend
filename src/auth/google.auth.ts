@@ -39,9 +39,13 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
       const user = await this.userModel.findOne({ email: emails[0].value });
 
       if (user) {
-        const payload = { email: user.email, sub: user._id, role: user.role };
+        const payload = {
+          email: user.email,
+          sub: user._id,
+          role: user.role,
+        };
         const token = this.jwtService.sign(payload);
-        done(null, { token, userId: user._id });
+        done(null, { token, userId: user._id, isFirstLogin: false });
       } else {
         const newUser = await this.userModel.create({
           name: name.givenName,
@@ -59,7 +63,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           role: newUser.role,
         };
         const token = this.jwtService.sign(payload);
-        done(null, { token, userId: newUser._id });
+        done(null, { token, userId: newUser._id, isFirstLogin: true });
       }
     } catch (error) {
       if (error instanceof UnauthorizedException) {
