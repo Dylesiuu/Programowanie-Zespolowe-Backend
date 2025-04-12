@@ -185,6 +185,7 @@ export class AuthController {
             'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvcmRhbiBEb2UiLCJpYXQiOjE1MTYyMzkwMjIsImV4cCI6MTUxNjI0MjYyMiwicm9sZSI6InVzZXIifQ.5mhBHqs5_DTLdINd9p5m7ZJ6XD0Xc55kIaCRY5r6HRA',
         },
         userId: { type: 'number', example: 1 },
+        isFirstLogin: { type: 'boolean', example: true },
         statusCode: { type: 'number', example: 200 },
       },
     },
@@ -203,10 +204,12 @@ export class AuthController {
     const user = req.user;
     const token = user.token;
     const userId = user.userId;
+    const isFirstLogin = user.isFirstLogin;
     return {
       message: 'User logged successfully',
       token,
       userId,
+      isFirstLogin,
       statusCode: 200,
     };
   }

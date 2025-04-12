@@ -69,6 +69,7 @@ describe('GoogleAuth', () => {
     expect(done.mock.calls[0][1]).toEqual({
       token: 'test-token',
       userId: user._id,
+      isFirstLogin: false,
     });
   });
 
@@ -96,6 +97,7 @@ describe('GoogleAuth', () => {
     expect(done.mock.calls[0][1]).toEqual({
       token: 'test-token',
       userId: '123',
+      isFirstLogin: true,
     });
   });
 
