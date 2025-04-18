@@ -7,7 +7,6 @@ import {
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
-import { Request } from 'express';
 
 @Injectable()
 export class TokenService {
@@ -79,12 +78,12 @@ export class TokenService {
     }
   }
 
-  async getUserIdFromToken(token: string): Promise<ObjectId | null> {
+  async getUserIdFromToken(token: string): Promise<string | null> {
     try {
       const payload = this.jwtService.verify(token);
 
-      if (payload.sub && ObjectId.isValid(payload.sub)) {
-        return new ObjectId(payload.sub as string);
+      if (payload.sub) {
+        return payload.sub;
       }
       return null;
     } catch (error) {
