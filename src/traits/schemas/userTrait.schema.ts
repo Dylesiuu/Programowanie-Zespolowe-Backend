@@ -19,7 +19,7 @@ export class UserTrait {
 
   @Prop({
     type: MongooseSchema.Types.ObjectId,
-    ref: 'AnimalTrait',
+    ref: 'UserTrait',
     required: true,
   })
   conflicts: MongooseSchema.Types.ObjectId;
