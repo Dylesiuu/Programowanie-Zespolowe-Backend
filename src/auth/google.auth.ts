@@ -7,10 +7,11 @@ import { PassportStrategy } from '@nestjs/passport';
 import { Strategy, VerifyCallback } from 'passport-google-oauth20';
 import { ConfigService } from '@nestjs/config';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
 import { User } from '../user/schemas/user.schema';
 import { UserRole } from './roles/user-role.enum';
 import { TokenService } from './token.service';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
@@ -50,7 +51,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           await this.tokenService.generateRefreshToken(payload);
 
         const tokenDeleted = await this.tokenService.deleteRefreshToken(
-          user._id as unknown as ObjectId,
+          new ObjectId(user._id),
         );
 
         if (!tokenDeleted) {
@@ -63,7 +64,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
         }
 
         const tokenSaved = await this.tokenService.saveRefreshToken(
-          user._id as unknown as ObjectId,
+          new ObjectId(user._id),
           refresh_token,
         );
 
@@ -75,7 +76,12 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
             false,
           );
         }
-        done(null, { access_token, refresh_token, userId: user._id, isFirstLogin: false });
+        done(null, {
+          access_token,
+          refresh_token,
+          userId: user._id,
+          isFirstLogin: false,
+        });
       } else {
         const newUser = await this.userModel.create({
           name: name.givenName,
@@ -105,7 +111,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
           await this.tokenService.generateRefreshToken(payload);
 
         const tokenDeleted = await this.tokenService.deleteRefreshToken(
-          newUser._id as unknown as ObjectId,
+          new ObjectId(newUser._id),
         );
 
         if (!tokenDeleted) {
@@ -118,7 +124,7 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
         }
 
         const tokenSaved = await this.tokenService.saveRefreshToken(
-          newUser._id as unknown as ObjectId,
+          new ObjectId(newUser._id),
           refresh_token,
         );
         if (!tokenSaved) {
@@ -129,16 +135,18 @@ export class GoogleAuth extends PassportStrategy(Strategy, 'google') {
             false,
           );
         }
-        done(null, { access_token, refresh_token, userId: newUser._id, isFirstLogin: true });
+        done(null, {
+          access_token,
+          refresh_token,
+          userId: newUser._id,
+          isFirstLogin: true,
+        });
       }
     } catch (error) {
       if (error instanceof UnauthorizedException) {
         return done(new UnauthorizedException('Unauthorized'), false);
       }
-      return done(
-        new InternalServerErrorException(error.message),
-        false,
-      );
+      return done(new InternalServerErrorException(error.message), false);
     }
   }
 }
