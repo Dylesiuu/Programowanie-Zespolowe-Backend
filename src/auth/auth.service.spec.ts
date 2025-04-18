@@ -59,10 +59,10 @@ describe('AuthService', () => {
     userModel.findOne.mockResolvedValue(null);
     userModel.create.mockResolvedValue({
       ...newUserData,
-      _id: '123',
+      _id: '60c72b2f9b1d8e4a5f6e7d8c',
       save: jest.fn().mockResolvedValue({
         ...newUserData,
-        _id: '123',
+        _id: '60c72b2f9b1d8e4a5f6e7d8c',
       }),
     } as any);
 
@@ -86,13 +86,13 @@ describe('AuthService', () => {
 
     expect(tokenService.generateAccessToken).toHaveBeenCalledWith({
       email: newUserData.email,
-      sub: '123',
+      sub: '60c72b2f9b1d8e4a5f6e7d8c',
       role: UserRole.USER,
     });
 
     expect(tokenService.generateRefreshToken).toHaveBeenCalledWith({
       email: newUserData.email,
-      sub: '123',
+      sub: '60c72b2f9b1d8e4a5f6e7d8c',
       role: UserRole.USER,
     });
 
@@ -100,7 +100,7 @@ describe('AuthService', () => {
       message: 'User registered successfully',
       access_token: 'mocked-jwt-token',
       refresh_token: 'mocked-jwt-token',
-      userId: '123',
+      userId: '60c72b2f9b1d8e4a5f6e7d8c',
     });
   });
 
@@ -155,7 +155,7 @@ describe('AuthService', () => {
     userModel.findOne.mockResolvedValueOnce({
       ...newUserData,
       password: hashedPassword,
-      _id: '123',
+      _id: '60c72b2f9b1d8e4a5f6e7d8c',
       role: UserRole.USER,
     } as any);
 
@@ -174,7 +174,7 @@ describe('AuthService', () => {
       message: 'User logged successfully',
       access_token: 'mocked-jwt-token',
       refresh_token: 'mocked-jwt-token',
-      userId: '123',
+      userId: '60c72b2f9b1d8e4a5f6e7d8c',
     });
   });
 
@@ -240,5 +240,4 @@ describe('AuthService', () => {
       userId: null,
     });
   });
-
 });

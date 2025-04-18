@@ -61,7 +61,7 @@ describe('GoogleAuth', () => {
     };
     const user = {
       email: 'john.doe@example.com',
-      _id: '123',
+      _id: '60c72b2f9b1d8e4a5f6e7d8c',
       role: UserRole.USER,
     };
     userModel.findOne.mockResolvedValue(user);
@@ -92,14 +92,14 @@ describe('GoogleAuth', () => {
     const newUser = {
       save: jest.fn().mockResolvedValue({
         email: 'john.doe@example.pl',
-        _id: '123',
+        _id: '60c72b2f9b1d8e4a5f6e7d8c',
         password: 'google-oauth',
         name: profile.name.givenName,
         lastname: profile.name.familyName,
         role: UserRole.USER,
       }),
       email: 'john.doe@example.pl',
-      _id: '123',
+      _id: '60c72b2f9b1d8e4a5f6e7d8c',
       password: 'google-oauth',
       name: profile.name.givenName,
       lastname: profile.name.familyName,
@@ -119,7 +119,7 @@ describe('GoogleAuth', () => {
     expect(done.mock.calls[0][1]).toEqual({
       access_token: 'test-token',
       refresh_token: 'test-token',
-      userId: '123',
+      userId: newUser._id,
       isFirstLogin: true,
     });
   });
