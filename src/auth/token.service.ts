@@ -4,7 +4,8 @@ import {
   RefreshToken,
   RefreshTokenDocument,
 } from './schema/refreshToken.schema';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
@@ -74,6 +75,20 @@ export class TokenService {
     } catch (error) {
       console.error('Error deleting refresh token:', error);
       return false;
+    }
+  }
+
+  async getUserIdFromToken(token: string): Promise<ObjectId | null> {
+    try {
+      const payload = this.jwtService.verify(token);
+
+      if (payload.sub && ObjectId.isValid(payload.sub)) {
+        return new ObjectId(payload.sub as string);
+      }
+      return null;
+    } catch (error) {
+      console.error('Error decoding token:', error);
+      return null;
     }
   }
 }
