@@ -93,8 +93,8 @@ export class TokenService {
     }
   }
 
-  async getTokenFromHeader(request: Request): Promise<string> {
-    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+  async getTokenFromHeader(authHeader: string | undefined): Promise<string> {
+    const [type, token] = authHeader?.split(' ') ?? [];
     return type === 'Bearer' ? token : undefined;
   }
 }
