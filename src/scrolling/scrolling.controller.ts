@@ -5,6 +5,7 @@ import {
   NotFoundException,
   Param,
   Post,
+  Headers,
 } from '@nestjs/common';
 import { ScrollingService } from './scrolling.service';
 import { ObjectId } from 'mongodb';
@@ -13,13 +14,17 @@ import { ApiBody, ApiOperation, ApiResponse, ApiTags } from '@nestjs/swagger';
 import { Roles } from 'src/auth/decorators/roles.decorator';
 import { UserRole } from 'src/auth/roles/user-role.enum';
 import { ApiRoles } from 'src/decorators/api-roles.decorator';
+import { TokenService } from 'src/auth/token.service';
 
 @ApiTags('ScrollingController')
 @Controller('scrolling')
 export class ScrollingController {
   private scrollingService;
 
-  constructor(scrollingService: ScrollingService) {
+  constructor(
+    scrollingService: ScrollingService,
+    private readonly tokenService: TokenService,
+  ) {
     this.scrollingService = scrollingService;
   }
 
@@ -375,11 +380,14 @@ export class ScrollingController {
     },
   })
   async match(
-    @Body('userId') userId: string,
+    @Headers('Authorization') authHeader: string,
     @Body('lng') lng: number,
     @Body('lat') lat: number,
     @Body('range') range: number,
   ) {
+    const token = await this.tokenService.getTokenFromHeader(authHeader);
+    const userId = await this.tokenService.getUserIdFromToken(token);
+
     const mes = {
       message: 'Invalid input',
       statusCode: 400,
