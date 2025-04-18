@@ -7,6 +7,7 @@ import {
 import { Model } from 'mongoose';
 import { ObjectId } from 'mongodb';
 import { InjectModel } from '@nestjs/mongoose';
+import { Request } from 'express';
 
 @Injectable()
 export class TokenService {
@@ -90,5 +91,10 @@ export class TokenService {
       console.error('Error decoding token:', error);
       return null;
     }
+  }
+
+  async getTokenFromHeader(request: Request): Promise<string> {
+    const [type, token] = request.headers.authorization?.split(' ') ?? [];
+    return type === 'Bearer' ? token : undefined;
   }
 }
