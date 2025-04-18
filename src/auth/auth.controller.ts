@@ -26,10 +26,10 @@ import {
 import { Public } from './decorators/public.decorator';
 import { Response } from 'express';
 import { TokenService } from './token.service';
-import { ObjectId } from 'mongoose';
 import { Roles } from './decorators/roles.decorator';
 import { UserRole } from './roles/user-role.enum';
 import { ApiRoles } from 'src/decorators/api-roles.decorator';
+import { ObjectId } from 'mongodb';
 
 @ApiTags('AuthenticationController')
 @Controller('auth')
@@ -453,7 +453,7 @@ export class AuthController {
     const newRefreshToken =
       await this.tokenService.generateRefreshToken(payload);
     const tokenDeleted = await this.tokenService.deleteRefreshToken(
-      user.userId as ObjectId,
+      new ObjectId(user.userId as string),
     );
     if (!tokenDeleted) {
       throw new InternalServerErrorException(
@@ -461,7 +461,7 @@ export class AuthController {
       );
     }
     const tokenSaved = await this.tokenService.saveRefreshToken(
-      user.userId as ObjectId,
+      new ObjectId(user.userId as string),
       newRefreshToken,
     );
     if (!tokenSaved) {
@@ -529,7 +529,7 @@ export class AuthController {
   })
   async logout(@Body('userId') userId: string) {
     const tokenDeleted = await this.tokenService.deleteRefreshToken(
-      userId as unknown as ObjectId,
+      new ObjectId(userId),
     );
     if (!tokenDeleted) {
       throw new InternalServerErrorException(
@@ -589,7 +589,7 @@ export class AuthController {
   })
   async deleteToken(@Body('userId') userId: string) {
     const tokenDeleted = await this.tokenService.deleteRefreshToken(
-      userId as unknown as ObjectId,
+      new ObjectId(userId),
     );
     if (!tokenDeleted) {
       throw new InternalServerErrorException(
