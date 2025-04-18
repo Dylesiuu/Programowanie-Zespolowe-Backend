@@ -7,6 +7,7 @@ import {
   UnauthorizedException,
   UseGuards,
   Req,
+  Res,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -200,17 +201,14 @@ export class AuthController {
       },
     },
   })
-  async googleAuthRedirect(@Req() req) {
+  async googleAuthRedirect(@Req() req, @Res() res) {
     const user = req.user;
     const token = user.token;
     const userId = user.userId;
     const isFirstLogin = user.isFirstLogin;
-    return {
-      message: 'User logged successfully',
-      token,
-      userId,
-      isFirstLogin,
-      statusCode: 200,
-    };
+
+    const redirectUrl = `success?returnURL=${process.env.FRONTEND_URL}/auth/google/token=${token}&userId=${userId}&isFirstLogin=${isFirstLogin}`;
+
+    return res.redirect(redirectUrl);
   }
 }
