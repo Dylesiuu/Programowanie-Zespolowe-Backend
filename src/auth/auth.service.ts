@@ -1,7 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
-import { Model, ObjectId } from 'mongoose';
+import { Model } from 'mongoose';
+import { ObjectId } from 'mongodb';
 import { User, UserDocument } from '../user/schemas/user.schema';
 import { InjectModel } from '@nestjs/mongoose';
 import { UserRole } from './roles/user-role.enum';
@@ -53,7 +54,7 @@ export class AuthService {
       };
     }
     const tokenDeleted = await this.tokenService.deleteRefreshToken(
-      user._id as ObjectId,
+      new ObjectId(user._id as string),
     );
 
     if (!tokenDeleted) {
@@ -66,7 +67,7 @@ export class AuthService {
     }
 
     const tokenSaved = await this.tokenService.saveRefreshToken(
-      user._id as ObjectId,
+      new ObjectId(user._id as string),
       refresh_token,
     );
 
@@ -112,7 +113,7 @@ export class AuthService {
         await this.tokenService.generateRefreshToken(payload);
 
       const tokenDeleted = await this.tokenService.deleteRefreshToken(
-        userExist._id as ObjectId,
+        new ObjectId(userExist._id as string),
       );
 
       if (!tokenDeleted) {
@@ -125,7 +126,7 @@ export class AuthService {
       }
 
       const tokenSaved = await this.tokenService.saveRefreshToken(
-        userExist._id as ObjectId,
+        new ObjectId(userExist._id as string),
         refresh_token,
       );
       if (!tokenSaved) {
